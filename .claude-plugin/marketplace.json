@@ -1,0 +1,18 @@
+{
+  "name": "hunzai-agents",
+  "owner": {
+    "name": "hunzai"
+  },
+  "plugins": [
+    {
+      "name": "trader",
+      "source": "./trader",
+      "description": "Solana trading agent powered by Jupiter Perpetuals and Swap"
+    },
+    {
+      "name": "voice",
+      "source": "./voice",
+      "description": "ElevenLabs text-to-speech — speak any text aloud using voice AI"
+    }
+  ]
+}
