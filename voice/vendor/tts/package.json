@@ -1,0 +1,19 @@
+{
+  "name": "openclaw-tts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "speak": "node dist/cli.js speak",
+    "voices": "node dist/cli.js voices"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "*",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
