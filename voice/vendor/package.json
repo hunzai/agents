@@ -1,8 +1,0 @@
-{
-  "name": "voice-vendor",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "@elevenlabs/elevenlabs-js": "*"
-  }
-}
