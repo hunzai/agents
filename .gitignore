@@ -1,0 +1,10 @@
+# Build artifacts — rebuilt automatically on first agent start
+**/dist/
+**/node_modules/
+
+# Environment and secrets
+**/.env
+**/wallet.json
+
+# Claude Code local session data
+**/.claude/

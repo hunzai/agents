@@ -1,0 +1,10 @@
+{
+  "name": "price",
+  "version": "1.0.0",
+  "description": "CoinGecko market_chart historical (prices, market_caps, total_volumes)",
+  "main": "dist/index.js",
+  "type": "module",
+  "openclaw": { "extensions": ["./index.ts"] },
+  "scripts": { "build": "tsc", "clean": "rm -rf dist", "historical": "node dist/cli.js historical", "analysis": "node dist/cli.js price analysis" },
+  "devDependencies": { "@types/node": "^20.0.0", "typescript": "^5.0.0" }
+}

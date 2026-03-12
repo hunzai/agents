@@ -1,0 +1,7 @@
+{
+  "id": "jupiter",
+  "name": "Jupiter",
+  "version": "1.0.0",
+  "description": "Jupiter Perpetuals (leverage) + Jupiter Aggregator (swap)",
+  "configSchema": { "type": "object", "additionalProperties": false, "properties": {} }
+}

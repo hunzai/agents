@@ -1,0 +1,8 @@
+{
+  "name": "trader",
+  "description": "Solana trading agent powered by Jupiter Perpetuals and Swap",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  }
+}

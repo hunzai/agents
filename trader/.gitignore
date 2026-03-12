@@ -1,0 +1,10 @@
+# Vendor build artifacts — rebuilt automatically by scripts/setup.sh on first agent start
+vendor/*/dist/
+vendor/*/node_modules/
+
+# Environment — contains API keys and wallet paths, never commit
+.env
+
+# Claude Code local session data — machine-specific, auto-generated
+.claude/
+.claude

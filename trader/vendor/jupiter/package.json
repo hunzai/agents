@@ -1,0 +1,34 @@
+{
+  "name": "openclaw-jupiter",
+  "version": "1.0.0",
+  "description": "Jupiter Perpetuals (leverage) + Jupiter Aggregator (swap) in one extension",
+  "main": "dist/index.js",
+  "openclaw": { "extensions": ["./index.ts"] },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "perps": "node dist/cli.js perps",
+    "swap": "node dist/cli.js swap",
+    "list": "node dist/cli.js perps list",
+    "open-long": "node dist/cli.js perps open-long",
+    "open-short": "node dist/cli.js perps open-short",
+    "close": "node dist/cli.js perps close",
+    "pnl": "node dist/cli.js perps pnl",
+    "balance": "node dist/cli.js swap balance",
+    "quote": "node dist/cli.js swap quote",
+    "buy": "node dist/cli.js swap buy",
+    "sell": "node dist/cli.js swap sell"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "openclaw-common": "file:../common",
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/web3.js": "^1.95.3",
+    "axios": "^1.7.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
