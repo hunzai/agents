@@ -1,0 +1,8 @@
+{
+  "name": "voice",
+  "description": "ElevenLabs text-to-speech — speak any text aloud using the ElevenLabs voice AI API",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  }
+}

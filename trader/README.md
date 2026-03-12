@@ -28,7 +28,7 @@ export RPC_URL="https://your-rpc-endpoint.com"
 # Optional
 export JUPITER_API_KEY="your-jupiter-paid-api-key"
 export SLIPPAGE_BPS=50           # 0.5% default
-export COINGECKO_API_KEY="..."   # for higher rate limits on price history
+export COINGECKO_API_KEY="..."   # for higher rate limits on price history and signal volume analysis
 ```
 
 Two keypair formats are supported:
@@ -86,6 +86,56 @@ Close position AbCd...1234
 
 Or trigger it in any conversation — the agent description is broad enough that
 Claude will delegate automatically when trading intent is detected.
+
+### Price Signal Analysis
+
+Before making trades, use the `signal` command to analyze technical indicators (RSI, MACD, Bollinger Bands, Volume) and get a weighted prediction:
+
+```bash
+# Analyze SOL with default 120-minute window
+cd vendor/price && node dist/cli.js signal
+
+# Analyze ETH over 240 minutes
+cd vendor/price && node dist/cli.js signal eth 240
+
+# Analyze BTC over 60 minutes
+cd vendor/price && node dist/cli.js signal btc 60
+```
+
+Example output:
+
+```json
+{
+  "success": true,
+  "symbol": "SOL",
+  "current_price": 145.23,
+  "timestamp": "2026-03-12T10:00:00Z",
+  "prediction": "bullish",
+  "confidence": 0.68,
+  "signals": {
+    "rsi": { "value": 38.2, "signal": "oversold", "weight": 0.25 },
+    "macd": { "macd": -0.45, "signal_line": -0.23, "histogram": -0.22, "signal": "bullish", "weight": 0.3 },
+    "bollinger": { "upper": 152.1, "middle": 145.0, "lower": 137.9, "position": "below_middle", "signal": "neutral", "weight": 0.25 },
+    "volume": { "current_volume": 1234567890, "avg_volume": 987654321, "ratio": 1.25, "signal": "high", "weight": 0.2 }
+  },
+  "data_points": 120,
+  "minutes": 120
+}
+```
+
+Use this analysis to inform your trading decisions:
+- **Prediction**: `bullish`, `bearish`, or `neutral` based on weighted indicator scoring
+- **Confidence**: 0-1 score indicating signal strength
+- **Individual signals**: Each indicator (RSI, MACD, Bollinger, Volume) with its own prediction and weight
+
+Example workflow:
+```bash
+# Check SOL signal before entering a position
+cd vendor/price && node dist/cli.js signal sol 120
+
+# If prediction is "bullish" with confidence > 0.6, consider opening a long position
+# Use jupiter-trader agent to execute the trade
+```
 
 ## Project Structure
 

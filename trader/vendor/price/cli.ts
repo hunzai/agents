@@ -5,6 +5,7 @@
 
 import { historicalCommand } from "./src/commands/historical.js";
 import { analysisCommand } from "./src/commands/analysis.js";
+import { signalCommand } from "./src/commands/signal.js";
 
 const args = process.argv.slice(2);
 const cmd = args[0];
@@ -15,6 +16,7 @@ if (!cmd || cmd === "help" || cmd === "--help" || cmd === "-h") {
 Usage:
   node dist/cli.js price analysis <path> [minutes]
   node dist/cli.js historical [coinId] [days]
+  node dist/cli.js signal [symbol] [minutes]
 
 Commands:
   price analysis <path> [minutes]
@@ -26,13 +28,22 @@ Commands:
   historical [coinId] [days] CoinGecko market_chart: prices, market_caps, total_volumes.
                             coinId: default solana. days: default 1, max 365.
 
+  signal [symbol] [minutes]  Technical indicators (RSI, MACD, Bollinger, Volume).
+                            Weighted composite prediction: bullish | bearish | neutral.
+                            symbol: sol (default), eth, btc.
+                            minutes: default 120, must be 35–1440.
+
 Examples:
   node dist/cli.js price analysis /root/.openclaw/logs/solana/price_history.txt
   node dist/cli.js price analysis ./price_history.txt 30
   node dist/cli.js historical
   node dist/cli.js historical bitcoin 7
+  node dist/cli.js signal
+  node dist/cli.js signal sol 60
+  node dist/cli.js signal eth 240
+  node dist/cli.js signal btc
 
-Env: COINGECKO_API_KEY (optional, for historical). PRICE_HISTORY_FILE (optional default path for analysis).
+Env: COINGECKO_API_KEY (optional, for historical/signal). PRICE_HISTORY_FILE (optional default path for analysis).
 `);
   process.exit(0);
 }
@@ -77,10 +88,24 @@ async function main() {
     return;
   }
 
+  if (cmd === "signal") {
+    const symbol = args[1] ?? "sol";
+    const minutesArg = args[2];
+    const minutes = minutesArg != null ? parseInt(String(minutesArg), 10) : 120;
+    if (!Number.isFinite(minutes) || minutes < 35 || minutes > 1440) {
+      console.error(JSON.stringify({ success: false, error: "minutes must be 35–1440" }));
+      process.exit(1);
+    }
+    const result = await signalCommand({ symbol, minutes });
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(result.success ? 0 : 1);
+    return;
+  }
+
   console.error(
     JSON.stringify({
       success: false,
-      error: 'Use "price analysis <path> [minutes]" or "historical [coinId] [days]"',
+      error: 'Use "price analysis <path> [minutes]", "historical [coinId] [days]", or "signal [symbol] [minutes]"',
     })
   );
   process.exit(1);
