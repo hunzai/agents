@@ -13,6 +13,11 @@
       "name": "voice",
       "source": "./voice",
       "description": "ElevenLabs text-to-speech — speak any text aloud using voice AI"
+    },
+    {
+      "name": "price",
+      "source": "./price",
+      "description": "Solana price analysis — Pyth Network real-time fetch, local price history, CoinGecko historical data"
     }
   ]
 }

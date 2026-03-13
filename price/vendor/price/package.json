@@ -1,0 +1,20 @@
+{
+  "name": "openclaw-price",
+  "version": "1.0.0",
+  "description": "Solana price CLI — Pyth Network real-time fetch, CoinGecko historical data, local price history analysis",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "fetch": "node dist/cli.js fetch",
+    "analysis": "node dist/cli.js analysis",
+    "historical": "node dist/cli.js historical"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

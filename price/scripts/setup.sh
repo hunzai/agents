@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds vendor CLIs the first time the jupiter-trader agent starts.
+# Builds vendor CLIs the first time the price-analyst agent starts.
 # Idempotent: skips any package that already has a dist/ directory.
 set -euo pipefail
 
@@ -11,12 +11,10 @@ build_if_needed() {
   local dir="$VENDOR/$pkg"
 
   if [[ ! -d "$dir/dist" ]]; then
-    echo "[inti] Building $pkg..."
+    echo "[price] Building $pkg..."
     (cd "$dir" && npm install --silent && npm run build --silent)
-    echo "[inti] $pkg ready."
+    echo "[price] $pkg ready."
   fi
 }
 
-# Build in dependency order: common must precede jupiter
-build_if_needed common
-build_if_needed jupiter
+build_if_needed price

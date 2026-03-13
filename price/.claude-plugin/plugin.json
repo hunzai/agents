@@ -1,0 +1,8 @@
+{
+  "name": "price",
+  "description": "Solana price analysis — fetch real-time prices from Pyth Network, store to file, and analyze movements with CoinGecko historical data",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  }
+}

@@ -13,7 +13,7 @@ The Inti plugin bundles two CLI tools under `${CLAUDE_PLUGIN_ROOT}/vendor/`:
 | CLI | Binary path | Purpose |
 |-----|-------------|---------|
 | Jupiter | `${CLAUDE_PLUGIN_ROOT}/vendor/jupiter/dist/cli.js` | Spot swaps + perpetual positions |
-| Price | `${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js` | CoinGecko historical + local price file analysis |
+| Price | See `price` plugin | Install `price@hunzai-agents` for price fetching, analysis, and signals |
 
 All CLIs output JSON to stdout. Errors are JSON to stderr with `{ "success": false, "error": "..." }`.
 Exit code 0 = success, exit code 1 = error.
@@ -30,7 +30,7 @@ Exit code 0 = success, exit code 1 = error.
 | `JUPITER_API_KEY` | No | — | Jupiter paid-tier API key |
 | `SLIPPAGE_BPS` | No | `50` | Swap slippage tolerance in basis points (50 = 0.5%) |
 | `COINGECKO_API_KEY` | No | — | CoinGecko API key for higher rate limits |
-| `PRICE_HISTORY_FILE` | No | — | Default path for `price analysis` command |
+| `PRICE_HISTORY_FILE` | No | — | Default path for price history file (used by the `price` plugin) |
 
 ---
 
@@ -202,61 +202,18 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/jupiter/dist/cli.js perps pnl \
 
 ---
 
-## Price CLI
+## Price data
 
-**Binary:** `node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js <command> [args]`
+Price fetching, history storage, analysis, and signals are provided by the
+**price** plugin. Install it for full market data capabilities:
 
-### historical
-Fetch OHLCV data from CoinGecko for any coin.
-```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical [coinId] [days]
 ```
-- `coinId`: CoinGecko coin ID (optional, default `solana`). Examples: `solana`, `bitcoin`, `ethereum`
-- `days`: Number of days of history (optional, default `1`, max `365`)
-
-```bash
-# SOL price for last 7 days
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical solana 7
-
-# BTC price for last 30 days
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical bitcoin 30
+/plugin install price@hunzai-agents
 ```
 
-**Output:**
-```json
-{
-  "success": true,
-  "coinId": "solana",
-  "days": 7,
-  "prices": [[1705276800000, 98.45], [1705363200000, 102.10]],
-  "market_caps": [[1705276800000, 45000000000]],
-  "total_volumes": [[1705276800000, 1200000000]]
-}
-```
-Timestamps are Unix milliseconds.
-
-### price analysis
-Analyse a local price history file. No API calls.
-```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js price analysis <path> [minutes]
-```
-- `path`: Path to a price history file in `epoch,timestamp,price` CSV format (required)
-- `minutes`: Look-back window in minutes (optional, default `60`, max `43200`)
-
-**Output:**
-```json
-{
-  "success": true,
-  "currentPrice": 192.30,
-  "minPrice": 188.10,
-  "maxPrice": 195.40,
-  "dipFromMax": -1.59,
-  "highFromMin": 2.23,
-  "trend": "bullish",
-  "sampledPrices": [188.10, 190.20, 192.30]
-}
-```
-`trend` values: `"bullish"`, `"bearish"`, or `"flat"`
+Once installed, the `price-analyst` agent handles: Pyth real-time prices,
+local price history files, CoinGecko historical OHLCV, and RSI/MACD/Bollinger/
+Volume composite signals.
 
 ---
 
@@ -287,8 +244,7 @@ Common errors:
 
 **Safe perps workflow:**
 ```
-1. historical solana 1   → get current price context
-2. perps list            → check existing positions
+1. perps list            → check existing positions
 3. perps open-long --collateral 50 --leverage 2   → open position
 4. perps pnl --position-pubkey <pk> --current-price <price>  → monitor
 5. perps close --position-pubkey <pk>             → close when done

@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
     "rootDir": "./",
+    "declaration": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["index.ts", "cli.ts", "src/**/*"],
+  "include": ["cli.ts", "src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

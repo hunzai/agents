@@ -1,6 +1,11 @@
 /**
- * Read price history file (monitor format: epoch,timestamp,price per line, optional header).
- * Returns last entry as current, min/max and first price in window, and window rows for sampling.
+ * Price history file reader and sampler.
+ *
+ * File format (one entry per line):
+ *   epoch,ISO-timestamp,price
+ *
+ * Example:
+ *   1709500000,2024-03-03T20:26:40.000Z,145.23
  */
 
 import { readFile } from "fs/promises";
@@ -12,13 +17,16 @@ export interface PriceHistoryRow {
 }
 
 export interface PriceHistoryResult {
+  /** Last entry — the current price. */
   current: number;
   currentEpoch: number;
+  /** Min price within the requested window. */
   min: number;
+  /** Max price within the requested window. */
   max: number;
-  /** First (oldest) price in the window, for trend. */
+  /** First (oldest) price in the window, used for trend calculation. */
   firstPriceInWindow: number;
-  /** Window rows sorted by epoch ascending (excluding last entry). */
+  /** All rows in the window, sorted ascending by epoch. */
   windowRows: PriceHistoryRow[];
 }
 
@@ -26,58 +34,55 @@ export async function readPriceHistoryFile(
   filePath: string,
   minutes: number
 ): Promise<PriceHistoryResult | null> {
-  const resolved = resolve(filePath);
-  const raw = await readFile(resolved, "utf-8");
-  const lines = raw.split("\n").filter((l) => l.trim());
+  const raw = await readFile(resolve(filePath), "utf-8");
   const rows: PriceHistoryRow[] = [];
-  for (const line of lines) {
-    const parts = line.split(",");
+
+  for (const line of raw.split("\n")) {
+    const parts = line.trim().split(",");
     if (parts.length < 3) continue;
+    if (parts[0].trim() === "epoch") continue; // header
+
     const epoch = parseInt(parts[0].trim(), 10);
     const price = parseFloat(parts[2].trim());
-    if (!Number.isFinite(epoch) || !Number.isFinite(price)) continue;
-    if (parts[0].trim() === "epoch") continue;
-    rows.push({ epoch, price });
+    if (Number.isFinite(epoch) && Number.isFinite(price)) {
+      rows.push({ epoch, price });
+    }
   }
+
   if (rows.length === 0) return null;
+
   const last = rows[rows.length - 1];
   const current = last.price;
   const currentEpoch = last.epoch;
   const cutoffEpoch = currentEpoch - minutes * 60;
+
   const windowRows = rows
     .filter((r) => r.epoch > cutoffEpoch && r.epoch < currentEpoch)
     .sort((a, b) => a.epoch - b.epoch);
-  const firstPriceInWindow = windowRows.length > 0 ? windowRows[0].price : current;
+
   if (windowRows.length === 0) {
-    return {
-      current,
-      currentEpoch,
-      min: current,
-      max: current,
-      firstPriceInWindow: current,
-      windowRows: [],
-    };
+    return { current, currentEpoch, min: current, max: current, firstPriceInWindow: current, windowRows: [] };
   }
-  const min = Math.min(...windowRows.map((r) => r.price));
-  const max = Math.max(...windowRows.map((r) => r.price));
+
+  const prices = windowRows.map((r) => r.price);
   return {
     current,
     currentEpoch,
-    min,
-    max,
-    firstPriceInWindow,
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+    firstPriceInWindow: windowRows[0].price,
     windowRows,
   };
 }
 
-/** Sample interval in minutes: 5 for small windows, 10 for medium, 60 for large. */
+/** Returns a sample interval in minutes appropriate for the window size. */
 export function getSampleIntervalMinutes(totalMinutes: number): number {
   if (totalMinutes <= 120) return 5;
   if (totalMinutes <= 720) return 10;
   return 60;
 }
 
-/** Pick sampled points from window rows: for each target timestamp (every intervalMinutes), take the row with epoch closest to that target. */
+/** Pick one price point per sample interval from the window rows. */
 export function sampleWindowRows(
   windowRows: PriceHistoryRow[],
   intervalMinutes: number,
@@ -85,27 +90,28 @@ export function sampleWindowRows(
   windowEndEpoch: number
 ): Array<{ epoch: number; price: number }> {
   if (windowRows.length === 0) return [];
+
   const intervalSec = intervalMinutes * 60;
   const targets: number[] = [];
   for (let t = windowStartEpoch; t < windowEndEpoch; t += intervalSec) {
     targets.push(t);
   }
+
   const result: Array<{ epoch: number; price: number }> = [];
   const seen = new Set<number>();
+
   for (const target of targets) {
     let best = windowRows[0];
     let bestDist = Math.abs(windowRows[0].epoch - target);
     for (let i = 1; i < windowRows.length; i++) {
       const d = Math.abs(windowRows[i].epoch - target);
-      if (d < bestDist) {
-        bestDist = d;
-        best = windowRows[i];
-      }
+      if (d < bestDist) { bestDist = d; best = windowRows[i]; }
     }
     if (!seen.has(best.epoch)) {
       seen.add(best.epoch);
       result.push({ epoch: best.epoch, price: best.price });
     }
   }
+
   return result.sort((a, b) => a.epoch - b.epoch);
 }
