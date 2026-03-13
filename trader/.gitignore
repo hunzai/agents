@@ -7,4 +7,7 @@ vendor/*/node_modules/
 
 # Claude Code local session data — machine-specific, auto-generated
 .claude/
+
+# Auto-generated scripts from loop runs — never commit
+*.js
 .claude

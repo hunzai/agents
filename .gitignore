@@ -1,9 +1,20 @@
-# Build artifacts — rebuilt automatically on first agent start
-**/dist/
-**/node_modules/
+# Claude Code session data
+.claude/
 
-# Environment and secrets
-**/.env
-**/wallet.json
+# Env files and wallet keys — never commit secrets
+.env
+*.env
+wallet.json
 
+# Audio output from voice plugin
+*.mp3
 
+# Skills lockfile (machine-specific)
+skills-lock.json
+
+# Auto-generated scripts from loop runs
+*.js
+
+# Node artifacts
+node_modules/
+dist/
