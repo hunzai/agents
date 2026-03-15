@@ -33,13 +33,13 @@ Add this repo as a marketplace, then install plugins by name:
 
 ### content-creator
 
-Audio → transcript → localized story → Urdu translation → 4 images → Urdu audio.
-Uses elevenlabs (stt, tts) and replicate (seedream) plugins.
+Audio → transcript → localized story → Urdu translation → 4 images → 4 videos → Urdu audio.
+Uses elevenlabs (stt, tts) and replicate (seedream, video) plugins.
 
 **Requires:** `ELEVENLABS_API_KEY`, `REPLICATE_API_TOKEN` in `.env`
 
 ```
-/content-creator ./raw/macros/chunk-20260315-154109.mp3 ./outputs/macros-20260315/
+/content-creator ./raw/money/ ./outputs/money/
 ```
 
 ### leverage-trade
@@ -60,12 +60,13 @@ Uses price (signal, levels, sentiment) and trader (jupiter perps) plugins.
 ```
 Run /content-creator with these inputs:
 
-Input:  ./raw/macros/chunk-20260315-154109.mp3
-Output: ./outputs/macros/
+Input:  ./raw/money/
+Output: ./outputs/money/
 
-Think like a brilliant teacher explaining difficult concepts  to someone
-who has never studied it by breaking it down to smaller parts and visual content. The output should be photos and audio
-that make the concepts click instantly.
+Think like a brilliant teacher explaining difficult concepts to someone
+who has never studied it by breaking it down to smaller parts and visual
+content. The output should be photos, videos, and audio that make the
+concepts click instantly.
 ```
 
 ### Leverage Trading

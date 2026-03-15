@@ -65,7 +65,7 @@ export async function runTts(opts: {
 
     process.stdout.write(`[send]  ${name} ... `);
     try {
-      const stream = await (client.textToSpeech as any).convertAsStream(opts.voiceId, {
+      const stream = await (client.textToSpeech as any).stream(opts.voiceId, {
         text,
         modelId: opts.modelId,
         outputFormat: opts.outputFormat,
