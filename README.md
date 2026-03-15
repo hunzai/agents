@@ -1,208 +1,139 @@
-# Install
-curl -fsSL https://claude.ai/install.sh | bash
-
-## use skills
-https://github.com/anthropics/skills
-
 # Agents
 
-A collection of Claude Code plugins. Each subdirectory is a self-contained
-plugin that can be installed independently.
+Claude Code plugins and skills for content creation and Solana trading.
 
-## Available Agents
+## Structure
 
-| Agent | Description |
-|-------|-------------|
-| [trader](./trader/) | Solana trading agent — Jupiter Perpetuals + Spot Swap |
-| [voice](./voice/) | Text-to-speech — speak any text using ElevenLabs voice AI |
-| [price](./price/) | Solana price analysis — Pyth Network + CoinGecko + local history |
+```
+.claude/skills/          Workflow skills (orchestrate plugins)
+  content-creator/         audio → story → Urdu → images → audio
+  leverage-trade/          market analysis → trade execution
+
+elevenlabs/              Plugin: speech-to-text, text-to-speech
+replicate/               Plugin: image generation (seedream, banana)
+price/                   Plugin: SOL price analysis, signals, levels
+trader/                  Plugin: Jupiter Perpetuals + Spot Swap
+```
 
 ## Installation
 
-Add this repo as a marketplace once, then install any agent by name:
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+Add this repo as a marketplace, then install plugins by name:
 
 ```bash
 /plugin marketplace add hunzai/agents
+/plugin install trader@hunzai-agents
+/plugin install price@hunzai-agents
 ```
 
----
+## Skills
 
-## trader
+### content-creator
 
-Solana trading agent powered by [Jupiter](https://jup.ag) Perpetuals and Spot Swap.
+Audio → transcript → localized story → Urdu translation → 4 images → Urdu audio.
+Uses elevenlabs (stt, tts) and replicate (seedream) plugins.
+
+**Requires:** `ELEVENLABS_API_KEY`, `REPLICATE_API_TOKEN` in `.env`
+
+```
+/content-creator ./raw/macros/chunk-20260315-154109.mp3 ./outputs/macros-20260315/
+```
+
+### leverage-trade
+
+SOL market analysis → trade decision → execution with confirmation → record keeping.
+Uses price (signal, levels, sentiment) and trader (jupiter perps) plugins.
 
 **Requires:** `WALLET_PATH`, `RPC_URL` in `.env`
 
-```bash
-/plugin install trader@hunzai-agents
+```
+/leverage-trade
 ```
 
-Invoked automatically when you ask about opening/closing positions, swapping
-tokens, checking balances, or monitoring PnL.
+## Example Prompts
 
-### Automated trading loop
+### Content Creator
 
-Use Claude Code's `/loop` command to run the trader on a schedule. The prompt
-below implements a full risk-managed perpetuals strategy:
+```
+Run /content-creator with these inputs:
+
+Input:  ./raw/macros/chunk-20260315-154109.mp3
+Output: ./outputs/macros-20260315/
+
+Think like a brilliant teacher explaining economics to someone
+who has never studied it. The output should be photos and audio
+that make the concepts click instantly.
+```
+
+### Leverage Trading
+
+```
+Run /leverage-trade with these settings:
+
+Collateral: 2 USDC
+Max leverage: 5x (micro-trade)
+
+Think like a professional scalp trader who protects capital above
+all else. Every decision must be backed by data from the CLIs.
+```
+
+### Automated Trading Loop
+
+Use `/loop` to run the trader on a schedule:
 
 ```
 /loop
 
-Do NOT write any code or scripts. Use only the installed plugin agents below.
-
 1. MARKET DATA → delegate to price-analyst agent:
-   "Fetch SOL price to /tmp/sol_price.txt, analyze last 4h, run signal. Return: price, 4h change%, trend, prediction, confidence."
+   "Fetch SOL price, analyze last 4h, run signal."
 
 2. MANAGE POSITIONS → delegate to jupiter-trader agent:
-   "List all open perps positions and calculate PnL for each at current price.
-    Close any position with PnL ≥ +10% (take profit) or ≤ -10% (stop-loss)."
+   "List open perps, calculate PnL. Close any position at +10% or -10%."
 
 3. OPEN NEW POSITION → delegate to jupiter-trader agent:
-   Use the price and signal from step 1. Collateral 2 USDC. Skip if same direction already open or confidence < 0.55.
-   |4h change| 4–8%  → open long/short 10x (follow signal direction)
-   |4h change| > 8%  → open long/short 15x (follow signal direction)
+   Collateral 2 USDC. Skip if same direction already open or confidence < 0.55.
+   |4h change| 4-8%  → open 10x (follow signal)
+   |4h change| > 8%  → open 15x (follow signal)
    |4h drop|  > 8% + RSI < 35 → open long 20x (mean-reversion)
    |4h change| < 4%  → no trade
 
-4. REPORT: price, 4h change, signal, positions with PnL%, actions taken.
+4. REPORT: price, 4h change, signal, positions, actions taken.
 ```
 
-**Schedule in a Claude Code session:**
+## Plugins
 
-```
-/loop run the trader loop above every 2 hours
-```
+### elevenlabs
 
-Cancel anytime with `/loop cancel <id>`.
+Speech processing powered by [ElevenLabs](https://elevenlabs.io).
 
-> **Risk note:** Always review open positions before starting the loop.
-> Start with small collateral (2 USDC) to validate the strategy.
+| Skill | Description |
+|-------|-------------|
+| stt | Transcribe audio files to text |
+| tts | Convert text files to audio |
+| speak | Speak text aloud and play immediately |
 
----
+Default voice: Achar (`Vwq3FUaRDrPephO3Qaxs`)
 
-## voice
+### replicate
 
-Text-to-speech powered by [ElevenLabs](https://elevenlabs.io). Converts text
-to audio and plays it immediately using `mpv` or `ffmpeg`.
+Image generation powered by [Replicate](https://replicate.com).
 
-**Requires:** `ELEVENLABS_API_KEY` in `.env`
+| Skill | Model | Cost |
+|-------|-------|------|
+| seedream (default) | bytedance/seedream-5-lite | $0.035/image |
+| banana (legacy) | google/nano-banana-pro | higher |
 
-```bash
-/plugin install voice@hunzai-agents
-```
+### price
 
-### Usage
+SOL price analysis via [Pyth Network](https://pyth.network) and [CoinGecko](https://coingecko.com).
 
-**As a slash command:**
+Commands: `fetch`, `signal`, `levels`, `sentiment`, `historical`, `stats`, `analysis`
 
-```
-/voice:speak Hello, world!
-/voice:speak Hello, world! --voice EXAVITQu4vr4xnSDxMaL
-/voice:speak Hello, world! --model eleven_multilingual_v2
-```
+### trader
 
-**As an agent** — just ask naturally:
+Solana trading via [Jupiter](https://jup.ag).
 
-> "Say hello in a calm female voice"
-> "Read this paragraph aloud"
-> "Use the Brian voice to narrate this"
-
-### CLI reference
-
-The plugin ships with a TypeScript CLI at `vendor/tts/`:
-
-```bash
-# Speak text (generates + plays automatically)
-node vendor/tts/dist/cli.js speak "Hello world"
-node vendor/tts/dist/cli.js speak "Hello world" --voice nPczCjzI2devNBz1zQrb --model eleven_turbo_v2_5
-node vendor/tts/dist/cli.js speak "Hello world" --output /tmp/out.mp3 --no-play
-
-# List voices and models
-node vendor/tts/dist/cli.js voices
-node vendor/tts/dist/cli.js models
-```
-
-### Voices
-
-| Name | ID | Style |
-|------|----|-------|
-| George *(default)* | `JBFqnCBsd6RMkjVDRZzb` | Male, narrative |
-| Brian | `nPczCjzI2devNBz1zQrb` | Male, deep |
-| Chris | `iP95p4xoKVk53GoZ742B` | Male, casual |
-| Liam | `TX3LPaxmHKxFdv7VOQHJ` | Male, energetic |
-| Sarah | `EXAVITQu4vr4xnSDxMaL` | Female, soft |
-| Charlotte | `XB0fDUnXU5powFXDhCwa` | Female, warm |
-| Jessica | `cgSgspJ2msm6clMCkdW9` | Female, expressive |
-| Lily | `pFZP5JQG7iQjIQuC4Bku` | Female, calm |
-
-### Models
-
-| Model | Latency | Languages |
-|-------|---------|-----------|
-| `eleven_flash_v2_5` *(default)* | ~75ms | 32 |
-| `eleven_turbo_v2_5` | Balanced | 32 |
-| `eleven_multilingual_v2` | Highest quality | 29 |
-
----
-
-## price
-
-Solana price analysis powered by [Pyth Network](https://pyth.network) and [CoinGecko](https://coingecko.com).
-Fetches real-time prices, stores them to a local CSV file, and analyzes movements (min/max/trend/dip).
-
-**Requires:** nothing — Pyth and CoinGecko are free. `COINGECKO_API_KEY` optional for higher rate limits.
-
-```bash
-/plugin install price@hunzai-agents
-```
-
-### Usage
-
-**As an agent** — just ask naturally:
-
-> "What's the current SOL price?"
-> "Is SOL in a dip right now compared to the last 4 hours?"
-> "Fetch and store the SOL price to /tmp/sol.txt"
-> "Show me Bitcoin's price history for the last 30 days"
-
-### CLI reference
-
-The plugin ships with a TypeScript CLI at `vendor/price/`:
-
-```bash
-# Fetch current price from Pyth → append to file
-node vendor/price/dist/cli.js fetch /tmp/sol_price.txt
-
-# Fetch from CoinGecko instead
-node vendor/price/dist/cli.js fetch /tmp/sol_price.txt --source gecko --coin solana
-
-# Analyze the last 60 minutes
-node vendor/price/dist/cli.js analysis /tmp/sol_price.txt 60
-
-# Analyze the last 24 hours
-node vendor/price/dist/cli.js analysis /tmp/sol_price.txt 1440
-
-# CoinGecko historical (7-day SOL)
-node vendor/price/dist/cli.js historical solana 7
-
-# CoinGecko historical (30-day BTC)
-node vendor/price/dist/cli.js historical bitcoin 30
-```
-
-### Price history file format
-
-```
-epoch,ISO-timestamp,price
-1709500000,2024-03-03T20:26:40.000Z,145.231847
-1709500060,2024-03-03T20:27:40.000Z,145.418200
-```
-
-### Pyth feed IDs
-
-| Asset | Feed ID |
-|-------|---------|
-| SOL/USD | `0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d` |
-| BTC/USD | `0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43` |
-| ETH/USD | `0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace` |
-
----
+Commands: `swap buy/sell/balance/quote`, `perps open-long/open-short/close/list/pnl`

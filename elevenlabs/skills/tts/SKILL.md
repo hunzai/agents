@@ -37,19 +37,16 @@ node ${CLAUDE_SKILL_DIR}/../../vendor/elevenlabs/dist/cli.js tts $ARGUMENTS
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--voice <id>` | Voice ID | George (`JBFqnCBsd6RMkjVDRZzb`) |
+| `--voice <id>` | Voice ID | Achar (`Vwq3FUaRDrPephO3Qaxs`) |
 | `--model <id>` | Model ID | `eleven_multilingual_v2` |
 | `--format <fmt>` | Output format | `mp3_44100_128` |
 | `--force` | Re-synthesize already-processed files | |
 
-## Voices
+## Voice
 
 | ID | Name | Style |
 |----|------|-------|
-| `JBFqnCBsd6RMkjVDRZzb` | George *(default)* | Male, narrative |
-| `nPczCjzI2devNBz1zQrb` | Brian | Male, deep |
-| `EXAVITQu4vr4xnSDxMaL` | Sarah | Female, soft |
-| `XB0fDUnXU5powFXDhCwa` | Charlotte | Female, warm |
+| `Vwq3FUaRDrPephO3Qaxs` | Achar *(default)* | Male |
 
 ## Models
 
@@ -63,6 +60,5 @@ node ${CLAUDE_SKILL_DIR}/../../vendor/elevenlabs/dist/cli.js tts $ARGUMENTS
 
 ```bash
 /elevenlabs:tts ./transcripts/
-/elevenlabs:tts ./transcripts/ ./audio/ --voice EXAVITQu4vr4xnSDxMaL
 /elevenlabs:tts ./transcripts/ ./audio/ --model eleven_flash_v2_5 --force
 ```

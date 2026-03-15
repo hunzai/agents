@@ -3,7 +3,7 @@ import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import * as fs from "fs";
 import * as path from "path";
 
-export const DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // George
+export const DEFAULT_VOICE_ID = "Vwq3FUaRDrPephO3Qaxs"; // Achar
 export const DEFAULT_MODEL = "eleven_multilingual_v2";
 export const DEFAULT_FORMAT = "mp3_44100_128";
 

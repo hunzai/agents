@@ -36,23 +36,16 @@ Audio plays automatically. Output is JSON: `{ "path": "...", "voice": "...", "mo
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--voice <id>` | Voice to use | George (`JBFqnCBsd6RMkjVDRZzb`) |
+| `--voice <id>` | Voice to use | Achar (`Vwq3FUaRDrPephO3Qaxs`) |
 | `--model <id>` | Model to use | `eleven_flash_v2_5` |
 | `--output <path>` | Output file | `/tmp/voice-speech.mp3` |
 | `--no-play` | Save to file only, skip playback | — |
 
-## Voices
+## Voice
 
 | ID | Name | Style |
 |----|------|-------|
-| `JBFqnCBsd6RMkjVDRZzb` | George *(default)* | Male, narrative |
-| `nPczCjzI2devNBz1zQrb` | Brian | Male, deep |
-| `iP95p4xoKVk53GoZ742B` | Chris | Male, casual |
-| `TX3LPaxmHKxFdv7VOQHJ` | Liam | Male, energetic |
-| `EXAVITQu4vr4xnSDxMaL` | Sarah | Female, soft |
-| `XB0fDUnXU5powFXDhCwa` | Charlotte | Female, warm |
-| `cgSgspJ2msm6clMCkdW9` | Jessica | Female, expressive |
-| `pFZP5JQG7iQjIQuC4Bku` | Lily | Female, calm |
+| `Vwq3FUaRDrPephO3Qaxs` | Achar *(default)* | Male |
 
 ## Models
 
@@ -68,5 +61,5 @@ Audio plays automatically. Output is JSON: `{ "path": "...", "voice": "...", "mo
 |-------|-------|-----|
 | `ELEVENLABS_API_KEY is not set` | Missing key | Add to `.env` |
 | `401 Unauthorized` | Invalid key | Check key at elevenlabs.io/app/settings/api-keys |
-| `422` | Bad voice/model ID | Run `cli.js voices` or `cli.js models` to verify |
+| `422` | Bad voice/model ID | Check ID is correct |
 | No audio plays | mpv/ffplay missing | Run `sudo apt-get install -y mpv` |

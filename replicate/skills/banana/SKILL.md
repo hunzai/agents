@@ -1,12 +1,15 @@
 ---
 name: banana
-description: Generate images from .txt prompt files using google/nano-banana-pro on Replicate. Invoke with /replicate:banana followed by input and output directory paths.
+description: >
+  Generate images from .txt prompt files using google/nano-banana-pro on Replicate.
+  LEGACY — prefer seedream for new work (cheaper, better text rendering).
+  Invoke with /replicate:banana followed by input and output directory paths.
 argument-hint: <input-dir> <output-dir> [--aspect-ratio 4:3] [--resolution 2K] [--format jpg] [--force]
 disable-model-invocation: true
 allowed-tools: Bash(*)
 ---
 
-# Generate Images (banana)
+# Generate Images (banana) — Legacy
 
 Generate one image per `.txt` prompt file using `google/nano-banana-pro` on Replicate.
 

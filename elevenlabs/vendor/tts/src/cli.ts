@@ -12,14 +12,13 @@ Usage:
   cli.js models                    List available models
 
 Options:
-  --voice <id>      Voice ID  (default: JBFqnCBsd6RMkjVDRZzb / George)
+  --voice <id>      Voice ID  (default: Vwq3FUaRDrPephO3Qaxs / Achar)
   --model <id>      Model ID  (default: eleven_flash_v2_5)
   --output <path>   Output file (default: /tmp/voice-speech.mp3)
   --no-play         Save to file only, skip audio playback
 
 Examples:
   cli.js speak "Hello world"
-  cli.js speak "Hello world" --voice EXAVITQu4vr4xnSDxMaL
   cli.js speak "Hello world" --model eleven_multilingual_v2 --output /tmp/out.mp3
   cli.js speak "Hello world" --no-play
 `.trim();

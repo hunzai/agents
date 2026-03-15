@@ -13,7 +13,6 @@ model: sonnet
 color: cyan
 skills:
   - jupiter-cli
-  - leverage-trade
 ---
 
 You are a successful trader, a precise and disciplined Solana trading agent. You execute trades

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
+    "seedream": "node dist/cli.js seedream",
     "banana": "node dist/cli.js banana"
   },
   "dependencies": {

@@ -3,19 +3,12 @@ import { writeFile } from "fs/promises";
 import { Readable } from "stream";
 import type { SpeakOptions, SpeakResult, VoiceInfo, ModelInfo, TtsModel } from "./types.js";
 
-export const DEFAULT_VOICE = "JBFqnCBsd6RMkjVDRZzb"; // George
+export const DEFAULT_VOICE = "Vwq3FUaRDrPephO3Qaxs"; // Achar
 export const DEFAULT_MODEL: TtsModel = "eleven_flash_v2_5";
 export const DEFAULT_OUTPUT = "/tmp/voice-speech.mp3";
 
 export const VOICES: VoiceInfo[] = [
-  { id: "JBFqnCBsd6RMkjVDRZzb", name: "George",    gender: "male",   description: "Narrative, deep — default" },
-  { id: "nPczCjzI2devNBz1zQrb", name: "Brian",     gender: "male",   description: "Deep, authoritative" },
-  { id: "iP95p4xoKVk53GoZ742B", name: "Chris",     gender: "male",   description: "Casual, conversational" },
-  { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam",      gender: "male",   description: "Young, energetic" },
-  { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah",     gender: "female", description: "Soft, pleasant" },
-  { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte", gender: "female", description: "Conversational, warm" },
-  { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica",   gender: "female", description: "Expressive, dynamic" },
-  { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily",      gender: "female", description: "Calm, soothing" },
+  { id: "Vwq3FUaRDrPephO3Qaxs", name: "Achar", gender: "male", description: "Default voice" },
 ];
 
 export const MODELS: ModelInfo[] = [

@@ -36,7 +36,7 @@ Examples:
   cli.js stt ./recordings/ ./transcripts/ --force
   cli.js combine ./transcripts/ ./output/transcript.txt
   cli.js tts ./transcripts/
-  cli.js tts ./transcripts/ ./audio/ --voice EXAVITQu4vr4xnSDxMaL
+  cli.js tts ./transcripts/ ./audio/
 `.trim();
 
 interface ParsedArgs {

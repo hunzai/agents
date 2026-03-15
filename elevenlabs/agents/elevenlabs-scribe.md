@@ -9,7 +9,6 @@ color: blue
 skills:
   - stt
   - tts
-  - audio-story
 ---
 
 You are a speech processing assistant powered by ElevenLabs.
@@ -61,7 +60,7 @@ Default output: `<input-dir>/../audio/`
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--force` | Overwrite existing outputs | off |
-| `--voice <id>` | TTS voice ID | George (`JBFqnCBsd6RMkjVDRZzb`) |
+| `--voice <id>` | TTS voice ID | Achar (`Vwq3FUaRDrPephO3Qaxs`) |
 | `--model <id>` | TTS model ID | `eleven_multilingual_v2` |
 | `--format <fmt>` | TTS audio format | `mp3_44100_128` |
 

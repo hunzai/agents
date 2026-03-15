@@ -1,16 +1,25 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { runBanana } from "./banana.js";
+import { runSeedream } from "./seedream.js";
 import type { AspectRatio, Resolution, OutputFormat } from "./banana.js";
+import type { SeedreamAspectRatio, SeedreamSize, SeedreamFormat } from "./seedream.js";
 
 const USAGE = `
 Replicate CLI — AI image and media generation
 
 Usage:
-  cli.js banana <input-dir> <output-dir> [options]
+  cli.js <command> <input-dir> <output-dir> [options]
 
 Commands:
-  banana   Generate images from .txt prompt files using google/nano-banana-pro
+  seedream  Generate images using bytedance/seedream-5-lite  [DEFAULT — $0.035/image]
+  banana    Generate images using google/nano-banana-pro
+
+Options for seedream (default):
+  --aspect-ratio <ratio>   1:1 | 4:3 | 3:4 | 16:9 | 9:16 | 3:2 | 2:3 | 21:9  (default: 4:3)
+  --size <size>            2K | 3K                                               (default: 2K)
+  --format <fmt>           jpg | png                                             (default: jpg)
+  --force                  Overwrite existing images
 
 Options for banana:
   --aspect-ratio <ratio>   1:1 | 4:3 | 3:4 | 16:9 | 9:16  (default: 4:3)
@@ -19,9 +28,14 @@ Options for banana:
   --force                  Overwrite existing images
 
 Examples:
+  # Seedream (default — use for all new work):
+  cli.js seedream ./prompts/ ./images/
+  cli.js seedream ./prompts/ ./images/ --aspect-ratio 16:9 --size 3K
+  cli.js seedream ./prompts/ ./images/ --format png --force
+
+  # Banana (legacy):
   cli.js banana ./prompts/ ./images/
   cli.js banana ./prompts/ ./images/ --aspect-ratio 16:9 --format png
-  cli.js banana ./prompts/ ./images/ --resolution 1K --force
 `.trim();
 
 interface ParsedArgs {
@@ -64,6 +78,23 @@ async function main(): Promise<void> {
   if (command === "help" || flags["help"] === "true") {
     console.log(USAGE);
     process.exit(0);
+  }
+
+  if (command === "seedream") {
+    const [inputDir, outputDir] = positionals;
+    if (!inputDir || !outputDir) {
+      console.error("Error: input-dir and output-dir are required.\n\n" + USAGE);
+      process.exit(1);
+    }
+    await runSeedream({
+      inputDir,
+      outputDir,
+      aspectRatio: (flags["aspect-ratio"] ?? "4:3") as SeedreamAspectRatio,
+      size: (flags["size"] ?? "2K") as SeedreamSize,
+      outputFormat: (flags["format"] ?? "jpg") as SeedreamFormat,
+      force: flags["force"] === "true",
+    });
+    return;
   }
 
   if (command === "banana") {

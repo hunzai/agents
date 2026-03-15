@@ -43,4 +43,4 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/tts/dist/cli.js models
 - Always use the CLI — never write custom HTTP calls or scripts.
 - Print the saved path from the JSON result after speaking.
 - If `ELEVENLABS_API_KEY` is missing, tell the user to add it to `.env`.
-- Default voice is George (`JBFqnCBsd6RMkjVDRZzb`), default model is `eleven_flash_v2_5`.
+- Default voice is Achar (`Vwq3FUaRDrPephO3Qaxs`), default model is `eleven_flash_v2_5`.
