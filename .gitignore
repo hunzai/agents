@@ -1,5 +1,4 @@
 # Claude Code session data
-.claude/
 
 # Env files and wallet keys — never commit secrets
 .env

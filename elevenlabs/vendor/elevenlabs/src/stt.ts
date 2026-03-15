@@ -50,7 +50,7 @@ export async function runStt(opts: {
 
       const result = await (client.speechToText as any).convert({
         file: blob,
-        modelId: "scribe_v1",
+        modelId: "scribe_v2",
         tagAudioEvents: false,
         diarize: false,
       });

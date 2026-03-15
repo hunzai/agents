@@ -10,6 +10,7 @@ import { historicalCommand } from "./src/commands/historical.js";
 import { signalCommand } from "./src/commands/signal.js";
 import { levelsCommand } from "./src/commands/levels.js";
 import { sentimentCommand } from "./src/commands/sentiment.js";
+import { statsCommand } from "./src/commands/stats.js";
 
 const USAGE = `
 Solana Price CLI
@@ -21,6 +22,7 @@ Usage:
   cli.js signal [symbol] [minutes]           RSI/MACD/Bollinger/EMA/Volume composite signal
   cli.js levels [symbol]                     Pivot points, S/R levels, swing highs/lows
   cli.js sentiment                           Fear & Greed index + global market data
+  cli.js stats [coinId] [days] [--last N]    24h price/volume stats + last-N candles
 
 fetch options:
   --source pyth|gecko   Price source (default: pyth, falls back to gecko)
@@ -47,7 +49,15 @@ Examples:
   cli.js signal btc 120
   cli.js levels
   cli.js levels sol
+  cli.js stats
+  cli.js stats solana 1
+  cli.js stats solana 1 --last 12
   cli.js sentiment
+
+stats options:
+  coinId                CoinGecko coin ID (default: solana)
+  days                  1–365 (default: 1)
+  --last N              Number of trailing candles for swing high/low stats (default: 24)
 
 Env:
   COINGECKO_API_KEY     Optional demo API key (raises rate limits)
@@ -181,6 +191,26 @@ async function main(): Promise<void> {
   // ── sentiment ──────────────────────────────────────────────────────────────
   if (command === "sentiment") {
     const result = await sentimentCommand();
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(result.success ? 0 : 1);
+  }
+
+  // ── stats ──────────────────────────────────────────────────────────────────
+  if (command === "stats") {
+    const coinId = positionals[0] ?? "solana";
+    const daysArg = positionals[1];
+    const days = daysArg != null ? parseInt(daysArg, 10) : 1;
+    if (!Number.isFinite(days) || days < 1 || days > 365) {
+      console.error("Error: days must be 1–365");
+      process.exit(1);
+    }
+    const lastArg = flags["last"];
+    const lastCandles = lastArg != null ? parseInt(lastArg, 10) : 24;
+    if (!Number.isFinite(lastCandles) || lastCandles < 1) {
+      console.error("Error: --last must be a positive integer");
+      process.exit(1);
+    }
+    const result = await statsCommand({ coinId, days, lastCandles });
     console.log(JSON.stringify(result, null, 2));
     process.exit(result.success ? 0 : 1);
   }

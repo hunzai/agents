@@ -262,6 +262,52 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js sentiment
 
 ---
 
+## stats — 24h price and volume statistics
+
+Fetches CoinGecko historical data and computes price/volume stats in one
+call — replaces any ad-hoc python or shell analysis of the raw JSON.
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js stats [coinId] [days] [--last N]
+```
+
+- `coinId`: CoinGecko coin ID (default: `solana`)
+- `days`: 1–365 (default: `1`)
+- `--last N`: number of trailing candles for swing/volume stats (default: `24`)
+
+**Output:**
+```json
+{
+  "success": true,
+  "coin_id": "solana",
+  "days": 1,
+  "timestamp": "2026-03-15T11:00:00.000Z",
+  "price_points": 288,
+  "open": 87.42,
+  "close": 88.31,
+  "high": 89.10,
+  "low": 86.55,
+  "change_pct": 1.02,
+  "volume_points": 288,
+  "avg_volume": 142000000,
+  "latest_volume": 98000000,
+  "volume_ratio": 0.69,
+  "last_candles": {
+    "count": 24,
+    "swing_high": 89.10,
+    "swing_low": 87.55,
+    "avg_volume": 135000000,
+    "latest_volume": 98000000,
+    "volume_ratio": 0.73
+  }
+}
+```
+
+**volume_ratio:** latest volume divided by average — `>1.0` = above-average
+activity (confirms move), `<0.5` = thin market (treat signals cautiously).
+
+---
+
 ## Common workflows
 
 ### Full trade signal (run in parallel)
@@ -290,4 +336,14 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js analysis /tmp/sol_price.txt 
 ### 7-day historical chart for Bitcoin
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical bitcoin 7
+```
+
+### Quick 24h price and volume snapshot for SOL
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js stats
+```
+
+### Stats with custom candle window (last 12 candles)
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js stats solana 1 --last 12
 ```
