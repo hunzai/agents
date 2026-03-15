@@ -13,8 +13,8 @@ context: fork
 
 # Content Creator Pipeline
 
-Audio → transcript → clean localized story → Urdu → 4 images → Urdu audio.
-Uses elevenlabs plugin CLIs (stt, tts, combine) and replicate plugin CLI (banana).
+Audio → transcript → clean localized story → Urdu → 4 images → videos → Urdu audio.
+Uses elevenlabs plugin CLIs (stt, tts, combine) and replicate plugin CLI (seedream, video).
 
 ## Safety
 
@@ -105,15 +105,30 @@ consistent visual style across all four images
 
 Save to `<output-dir>/prompts/01-<slug>.txt` through `04-<slug>.txt`.
 
-### Step 7: Generate images (gemeni banana)
+### Step 7: Generate images (seedream)
 
 ```bash
-node replicate/vendor/replicate/dist/cli.js banana \
+node replicate/vendor/replicate/dist/cli.js seedream \
   <output-dir>/prompts/ <output-dir>/images/ \
   --aspect-ratio 16:9 --size 2K --format jpg
 ```
 
-### Step 8: Generate Urdu audio
+### Step 8: Generate videos from documentary photos (optional)
+
+Copy the prompt files for the 2 documentary photos into the images directory
+so the video CLI can pair them, then generate:
+
+```bash
+cp <output-dir>/prompts/01-*.txt <output-dir>/prompts/02-*.txt <output-dir>/images/
+node replicate/vendor/replicate/dist/cli.js video \
+  <output-dir>/images/ <output-dir>/videos/ \
+  --resolution 480p --frames 81 --fps 16
+```
+
+Only the documentary photos (01, 02) get videos — infographics (03, 04) are
+static by nature. The video CLI skips images without a matching .txt prompt.
+
+### Step 9: Generate Urdu audio
 
 ```bash
 node elevenlabs/vendor/elevenlabs/dist/cli.js tts \
@@ -121,7 +136,7 @@ node elevenlabs/vendor/elevenlabs/dist/cli.js tts \
   --model eleven_multilingual_v2 --voice Vwq3FUaRDrPephO3Qaxs --format mp3_44100_128
 ```
 
-### Step 9: Report
+### Step 10: Report
 
 List every output file path with status.
 
@@ -144,6 +159,8 @@ List every output file path with status.
   images/02-*.jpg      documentary photo 2
   images/03-*.jpg      infographic 1
   images/04-*.jpg      infographic 2
+  videos/01-*.mp4      documentary video 1 (optional)
+  videos/02-*.mp4      documentary video 2 (optional)
 ```
 
 ---

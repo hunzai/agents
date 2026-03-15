@@ -11,8 +11,14 @@ wallet.json
 # Skills lockfile (machine-specific)
 skills-lock.json
 
-# Auto-generated scripts from loop runs
-*.js
+# Auto-generated loop scripts at repo root
+/trading-loop*.js
+/loop*.js
+/export-vars.sh
+
+# Generated content
+outputs/
+raw/
 
 # Node artifacts
 node_modules/

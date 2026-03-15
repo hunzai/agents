@@ -1,6 +1,6 @@
 {
   "name": "replicate",
-  "description": "Replicate AI image generation — generate images from text prompts using google/nano-banana-pro",
+  "description": "Replicate AI media — image generation (seedream, banana) and image-to-video (wan-video)",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"

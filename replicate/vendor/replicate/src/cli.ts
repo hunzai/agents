@@ -2,8 +2,10 @@
 import "dotenv/config";
 import { runBanana } from "./banana.js";
 import { runSeedream } from "./seedream.js";
+import { runVideo } from "./video.js";
 import type { AspectRatio, Resolution, OutputFormat } from "./banana.js";
 import type { SeedreamAspectRatio, SeedreamSize, SeedreamFormat } from "./seedream.js";
+import type { VideoResolution } from "./video.js";
 
 const USAGE = `
 Replicate CLI — AI image and media generation
@@ -13,6 +15,7 @@ Usage:
 
 Commands:
   seedream  Generate images using bytedance/seedream-5-lite  [DEFAULT — $0.035/image]
+  video     Generate video from image + prompt using wan-video/wan-2.2-i2v-fast
   banana    Generate images using google/nano-banana-pro
 
 Options for seedream (default):
@@ -20,6 +23,14 @@ Options for seedream (default):
   --size <size>            2K | 3K                                               (default: 2K)
   --format <fmt>           jpg | png                                             (default: jpg)
   --force                  Overwrite existing images
+
+Options for video:
+  --resolution <res>       480p | 720p                     (default: 480p)
+  --frames <n>             Number of frames                (default: 81)
+  --fps <n>                Frames per second               (default: 16)
+  --sample-shift <n>       Sample shift factor             (default: 12)
+  --no-fast                Disable go_fast optimization
+  --force                  Overwrite existing videos
 
 Options for banana:
   --aspect-ratio <ratio>   1:1 | 4:3 | 3:4 | 16:9 | 9:16  (default: 4:3)
@@ -32,6 +43,11 @@ Examples:
   cli.js seedream ./prompts/ ./images/
   cli.js seedream ./prompts/ ./images/ --aspect-ratio 16:9 --size 3K
   cli.js seedream ./prompts/ ./images/ --format png --force
+
+  # Video (image-to-video — feed seedream output):
+  cli.js video ./images/ ./videos/
+  cli.js video ./images/ ./videos/ --resolution 720p --frames 81
+  cli.js video ./images/ ./videos/ --fps 16 --force
 
   # Banana (legacy):
   cli.js banana ./prompts/ ./images/
@@ -92,6 +108,25 @@ async function main(): Promise<void> {
       aspectRatio: (flags["aspect-ratio"] ?? "4:3") as SeedreamAspectRatio,
       size: (flags["size"] ?? "2K") as SeedreamSize,
       outputFormat: ((flags["format"] ?? "jpg") === "jpg" ? "jpeg" : flags["format"] ?? "jpeg") as SeedreamFormat,
+      force: flags["force"] === "true",
+    });
+    return;
+  }
+
+  if (command === "video") {
+    const [inputDir, outputDir] = positionals;
+    if (!inputDir || !outputDir) {
+      console.error("Error: input-dir and output-dir are required.\n\n" + USAGE);
+      process.exit(1);
+    }
+    await runVideo({
+      inputDir,
+      outputDir,
+      resolution: (flags["resolution"] ?? "480p") as VideoResolution,
+      numFrames: parseInt(flags["frames"] ?? "81", 10),
+      fps: parseInt(flags["fps"] ?? "16", 10),
+      sampleShift: parseFloat(flags["sample-shift"] ?? "12"),
+      goFast: flags["no-fast"] !== "true",
       force: flags["force"] === "true",
     });
     return;

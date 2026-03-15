@@ -22,7 +22,7 @@
     {
       "name": "replicate",
       "source": "./replicate",
-      "description": "Replicate image generation — generate images from .txt prompt files using google/nano-banana-pro"
+      "description": "Replicate AI media — image generation (seedream, banana) and image-to-video (wan-video)"
     }
   ]
 }

@@ -10,7 +10,7 @@ Claude Code plugins and skills for content creation and Solana trading.
   leverage-trade/          market analysis → trade execution
 
 elevenlabs/              Plugin: speech-to-text, text-to-speech
-replicate/               Plugin: image generation (seedream, banana)
+replicate/               Plugin: image generation + image-to-video
 price/                   Plugin: SOL price analysis, signals, levels
 trader/                  Plugin: Jupiter Perpetuals + Spot Swap
 ```
@@ -119,12 +119,13 @@ Default voice: Achar (`Vwq3FUaRDrPephO3Qaxs`)
 
 ### replicate
 
-Image generation powered by [Replicate](https://replicate.com).
+AI media generation powered by [Replicate](https://replicate.com).
 
-| Skill | Model | Cost |
+| Skill | Model | Type |
 |-------|-------|------|
-| seedream (default) | bytedance/seedream-5-lite | $0.035/image |
-| banana (legacy) | google/nano-banana-pro | higher |
+| seedream (default) | bytedance/seedream-5-lite | text → image |
+| video | wan-video/wan-2.2-i2v-fast | image → video |
+| banana (legacy) | google/nano-banana-pro | text → image |
 
 ### price
 
