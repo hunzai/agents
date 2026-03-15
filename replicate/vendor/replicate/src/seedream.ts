@@ -7,7 +7,7 @@
  *  - output: string[] (array of URIs), not a single FileOutput
  *  - size param: "2K" | "3K" (not "resolution")
  *  - additional aspect ratios: "3:2" | "2:3" | "21:9"
- *  - output_format: "jpg" | "png" only (no webp)
+ *  - output_format: "jpeg" | "png" only (API requires "jpeg", not "jpg")
  */
 
 import "dotenv/config";
@@ -22,7 +22,7 @@ export type SeedreamAspectRatio =
   | "3:2" | "2:3" | "21:9" | "match_input_image";
 
 export type SeedreamSize = "2K" | "3K";
-export type SeedreamFormat = "jpg" | "png";
+export type SeedreamFormat = "jpeg" | "png";
 
 export async function runSeedream(opts: {
   inputDir: string;
@@ -63,7 +63,8 @@ export async function runSeedream(opts: {
     }
 
     const stem = path.basename(promptFile, ".txt");
-    const outPath = path.join(opts.outputDir, `${stem}.${opts.outputFormat}`);
+    const ext = opts.outputFormat === "jpeg" ? "jpg" : opts.outputFormat;
+    const outPath = path.join(opts.outputDir, `${stem}.${ext}`);
 
     if (fs.existsSync(outPath) && !opts.force) {
       console.log(`[skip]  ${path.basename(outPath)}`);

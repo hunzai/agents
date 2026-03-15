@@ -91,7 +91,7 @@ async function main(): Promise<void> {
       outputDir,
       aspectRatio: (flags["aspect-ratio"] ?? "4:3") as SeedreamAspectRatio,
       size: (flags["size"] ?? "2K") as SeedreamSize,
-      outputFormat: (flags["format"] ?? "jpg") as SeedreamFormat,
+      outputFormat: ((flags["format"] ?? "jpg") === "jpg" ? "jpeg" : flags["format"] ?? "jpeg") as SeedreamFormat,
       force: flags["force"] === "true",
     });
     return;

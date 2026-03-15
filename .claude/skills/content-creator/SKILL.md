@@ -14,7 +14,7 @@ context: fork
 # Content Creator Pipeline
 
 Audio → transcript → clean localized story → Urdu → 4 images → Urdu audio.
-Uses elevenlabs plugin CLIs (stt, tts, combine) and replicate plugin CLI (seedream).
+Uses elevenlabs plugin CLIs (stt, tts, combine) and replicate plugin CLI (banana).
 
 ## Safety
 
@@ -105,10 +105,10 @@ consistent visual style across all four images
 
 Save to `<output-dir>/prompts/01-<slug>.txt` through `04-<slug>.txt`.
 
-### Step 7: Generate images (seedream)
+### Step 7: Generate images (gemeni banana)
 
 ```bash
-node replicate/vendor/replicate/dist/cli.js seedream \
+node replicate/vendor/replicate/dist/cli.js banana \
   <output-dir>/prompts/ <output-dir>/images/ \
   --aspect-ratio 16:9 --size 2K --format jpg
 ```

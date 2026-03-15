@@ -61,10 +61,10 @@ Uses price (signal, levels, sentiment) and trader (jupiter perps) plugins.
 Run /content-creator with these inputs:
 
 Input:  ./raw/macros/chunk-20260315-154109.mp3
-Output: ./outputs/macros-20260315/
+Output: ./outputs/macros/
 
-Think like a brilliant teacher explaining economics to someone
-who has never studied it. The output should be photos and audio
+Think like a brilliant teacher explaining difficult concepts  to someone
+who has never studied it by breaking it down to smaller parts and visual content. The output should be photos and audio
 that make the concepts click instantly.
 ```
 
