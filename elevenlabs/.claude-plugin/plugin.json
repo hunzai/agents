@@ -4,11 +4,5 @@
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
-  },
-  "skills": [
-    "skills/stt",
-    "skills/tts",
-    "skills/speak",
-    "skills/audio-story"
-  ]
+  }
 }
