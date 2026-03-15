@@ -1,0 +1,8 @@
+{
+  "name": "replicate",
+  "description": "Replicate AI image generation — generate images from text prompts using google/nano-banana-pro",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  }
+}

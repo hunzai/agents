@@ -22,11 +22,7 @@ plugin that can be installed independently.
 Add this repo as a marketplace once, then install any agent by name:
 
 ```bash
-# In a Claude Code session
-/plugin marketplace add github.com/hunzai/agents
-/plugin install trader@hunzai-agents
-/plugin install voice@hunzai-agents
-/plugin install price@hunzai-agents
+/plugin marketplace add hunzai/agents
 ```
 
 ---
@@ -52,29 +48,23 @@ below implements a full risk-managed perpetuals strategy:
 ```
 /loop
 
-RULES: Use only Bash to run the commands below. Do NOT write any scripts or code.
+Do NOT write any code or scripts. Use only the installed plugin agents below.
 
-PRICE_CLI=~/.claude/plugins/cache/hunzai-agents/price/1.0.0/vendor/price/dist/cli.js
-JUPITER_CLI=~/.claude/plugins/cache/hunzai-agents/trader/1.0.0/vendor/jupiter/dist/cli.js
+1. MARKET DATA → delegate to price-analyst agent:
+   "Fetch SOL price to /tmp/sol_price.txt, analyze last 4h, run signal. Return: price, 4h change%, trend, prediction, confidence."
 
-1. MARKET DATA
-   node $PRICE_CLI fetch /tmp/sol_price.txt
-   node $PRICE_CLI analysis /tmp/sol_price.txt 240
-   node $PRICE_CLI signal sol 240
-   Record: current price, 12h change%, trend, signal prediction, confidence.
+2. MANAGE POSITIONS → delegate to jupiter-trader agent:
+   "List all open perps positions and calculate PnL for each at current price.
+    Close any position with PnL ≥ +10% (take profit) or ≤ -10% (stop-loss)."
 
-2. MANAGE POSITIONS
-   node $JUPITER_CLI perps list
-   node $JUPITER_CLI perps pnl --position-pubkey <pk> --current-price <price>
-   Close if PnL ≥ +10% or ≤ -10%.
+3. OPEN NEW POSITION → delegate to jupiter-trader agent:
+   Use the price and signal from step 1. Collateral 2 USDC. Skip if same direction already open or confidence < 0.55.
+   |4h change| 4–8%  → open long/short 10x (follow signal direction)
+   |4h change| > 8%  → open long/short 15x (follow signal direction)
+   |4h drop|  > 8% + RSI < 35 → open long 20x (mean-reversion)
+   |4h change| < 4%  → no trade
 
-3. OPEN NEW POSITION (2 USDC, skip if same direction open or confidence < 0.55)
-   |12h change| 4–8%  → node $JUPITER_CLI perps open-long/short --collateral 2 --leverage 10
-   |12h change| > 8%  → node $JUPITER_CLI perps open-long/short --collateral 2 --leverage 15
-   |12h  drop|  > 8% + RSI < 35 → node $JUPITER_CLI perps open-long --collateral 2 --leverage 20
-   |12h change| < 4%  → no trade
-
-4. REPORT: price, 12h change, signal, positions with PnL%, actions taken.
+4. REPORT: price, 4h change, signal, positions with PnL%, actions taken.
 ```
 
 **Schedule in a Claude Code session:**
@@ -216,10 +206,3 @@ epoch,ISO-timestamp,price
 | ETH/USD | `0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace` |
 
 ---
-
-## Adding a New Agent
-
-1. Create a subdirectory: `mkdir my-agent`
-2. Add `.claude-plugin/plugin.json` with `{ "name": "my-agent", ... }`
-3. Add `agents/`, `skills/`, `hooks/`, and `vendor/` as needed
-4. Push — it's immediately installable via `/plugin install my-agent@hunzai-agents`

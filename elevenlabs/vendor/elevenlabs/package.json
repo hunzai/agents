@@ -1,0 +1,19 @@
+{
+  "name": "openclaw-elevenlabs",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "stt": "node dist/cli.js stt",
+    "tts": "node dist/cli.js tts"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "*",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

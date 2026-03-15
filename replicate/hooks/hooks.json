@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SubagentStart": [
+      {
+        "matcher": "replicate-artist",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

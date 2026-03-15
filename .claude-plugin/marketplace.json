@@ -10,14 +10,19 @@
       "description": "Solana trading agent powered by Jupiter Perpetuals and Swap"
     },
     {
-      "name": "voice",
-      "source": "./voice",
-      "description": "ElevenLabs text-to-speech — speak any text aloud using voice AI"
-    },
-    {
       "name": "price",
       "source": "./price",
       "description": "Solana price analysis — Pyth Network real-time fetch, local price history, CoinGecko historical data"
+    },
+    {
+      "name": "elevenlabs",
+      "source": "./elevenlabs",
+      "description": "ElevenLabs speech — speak text aloud, batch transcribe audio files (STT), and batch convert text to audio (TTS)"
+    },
+    {
+      "name": "replicate",
+      "source": "./replicate",
+      "description": "Replicate image generation — generate images from .txt prompt files using google/nano-banana-pro"
     }
   ]
 }

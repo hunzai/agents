@@ -10,6 +10,7 @@ import { computeRSI } from "../indicators/rsi.js";
 import { computeMACD, type MACDResult } from "../indicators/macd.js";
 import { computeBollinger, type BollingerResult } from "../indicators/bollinger.js";
 import { analyzeVolume, type VolumeResult } from "../indicators/volume.js";
+import { computeEMACrossover, type EMACrossoverResult } from "../indicators/ema.js";
 
 type Prediction = "bullish" | "bearish" | "neutral";
 
@@ -44,11 +45,20 @@ interface VolumeSignalObject {
   weight: number;
 }
 
+interface EMACrossoverSignal {
+  fast_ema: number;
+  slow_ema: number;
+  gap_pct: number;
+  signal: string;
+  weight: number;
+}
+
 interface SignalGroup {
   rsi?: RSISignal;
   macd?: MACDSignal;
   bollinger?: BollingerSignal;
   volume?: VolumeSignalObject;
+  ema_crossover?: EMACrossoverSignal;
 }
 
 export interface SignalResult {
@@ -155,13 +165,17 @@ export async function signalCommand(params: {
     const bollingerValue = computeBollinger(allPrices);
     const volumeValue = volumeData ? analyzeVolume(volumeData) : null;
 
+    // Compute EMA crossover (20/50) before signals
+    const emaCrossover = computeEMACrossover(allPrices, 20, 50);
+
     // Build signals with weights
     const signals: SignalGroup = {};
     const weights: Record<string, number> = {
-      rsi: 0.25,
-      macd: 0.3,
-      bollinger: 0.25,
-      volume: 0.2,
+      rsi: 0.22,
+      macd: 0.28,
+      bollinger: 0.22,
+      volume: 0.15,
+      ema_crossover: 0.13,
     };
 
     let rsiSignal: number | null = null;
@@ -180,13 +194,10 @@ export async function signalCommand(params: {
     let macdSignal: number | null = null;
     if (macdValue !== null) {
       const { histogram } = macdValue;
-      if (histogram > 0 && histogram > (macdValue.macd - macdValue.signal_line)) {
-        macdSignal = 1; // bullish
-      } else if (histogram < 0 && histogram < (macdValue.macd - macdValue.signal_line)) {
-        macdSignal = -1; // bearish
-      } else {
-        macdSignal = 0;
-      }
+      // histogram = macd - signal_line; positive = bullish momentum, negative = bearish
+      if (histogram > 0) macdSignal = 1;
+      else if (histogram < 0) macdSignal = -1;
+      else macdSignal = 0;
 
       signals.macd = {
         macd: macdValue.macd,
@@ -236,6 +247,22 @@ export async function signalCommand(params: {
       };
     }
 
+    // EMA crossover signal
+    let emaCrossoverSignal: number | null = null;
+    if (emaCrossover !== null) {
+      if (emaCrossover.signal === "bullish") emaCrossoverSignal = 1;
+      else if (emaCrossover.signal === "bearish") emaCrossoverSignal = -1;
+      else emaCrossoverSignal = 0;
+
+      signals.ema_crossover = {
+        fast_ema: emaCrossover.fast_ema,
+        slow_ema: emaCrossover.slow_ema,
+        gap_pct: emaCrossover.gap_pct,
+        signal: emaCrossover.signal,
+        weight: weights.ema_crossover,
+      };
+    }
+
     // Calculate weighted composite score
     const scores: number[] = [];
     let totalWeight = 0;
@@ -255,6 +282,10 @@ export async function signalCommand(params: {
     if (volumeSignal !== null) {
       scores.push(volumeSignal * weights.volume);
       totalWeight += weights.volume;
+    }
+    if (emaCrossoverSignal !== null) {
+      scores.push(emaCrossoverSignal * weights.ema_crossover);
+      totalWeight += weights.ema_crossover;
     }
 
     // Predict based on weighted sum

@@ -2,9 +2,9 @@
 name: price-cli
 description: >
   Solana price CLI reference. Use this skill when fetching real-time prices
-  from Pyth Network, storing price history to a file, analyzing price movements
-  (min/max/trend), running RSI/MACD/Bollinger/Volume signals, or retrieving
-  CoinGecko historical market data.
+  from Pyth Network, storing price history, analyzing movements (min/max/trend),
+  running RSI/MACD/Bollinger/EMA/Volume signals, computing pivot-point S/R levels,
+  detecting swing highs/lows, or fetching Fear & Greed sentiment data.
 ---
 
 # Price CLI Reference
@@ -54,20 +54,13 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js fetch <output-path> \
 ```json
 {
   "success": true,
-  "price": 145.231847,
+  "price": 88.42,
   "epoch": 1709500000,
-  "timestamp": "2024-03-03T20:26:40.000Z",
+  "timestamp": "2026-03-15T11:00:00.000Z",
   "source": "pyth",
   "outputPath": "/tmp/sol_price.txt",
-  "line": "1709500000,2024-03-03T20:26:40.000Z,145.231847"
+  "line": "1709500000,2026-03-15T11:00:00.000Z,88.42"
 }
-```
-
-**File format** (one entry appended per call):
-```
-1709500000,2024-03-03T20:26:40.000Z,145.231847
-1709500060,2024-03-03T20:27:40.000Z,145.418200
-1709500120,2024-03-03T20:28:40.000Z,145.123456
 ```
 
 **Pyth feed IDs:**
@@ -96,27 +89,25 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js analysis <path> [minutes]
 {
   "success": true,
   "source": "file",
-  "current": 145.23,
-  "min": 143.10,
-  "max": 147.80,
-  "diff_from_max": -2.57,
-  "diff_from_min": 2.13,
-  "pct_dip_from_max": 1.7olean,
-  "pct_high_from_min": 1.489,
-  "trend": "bearish",
+  "current": 88.42,
+  "min": 86.72,
+  "max": 88.77,
+  "diff_from_max": -0.35,
+  "diff_from_min": 1.70,
+  "pct_dip_from_max": 0.394,
+  "pct_high_from_min": 2.017,
+  "trend": "bullish",
   "sample_interval_minutes": 5,
   "sampled_prices": [
-    { "epoch": 1709496400, "timestamp": "2024-03-03T19:20:00.000Z", "price": 147.80 },
-    { "epoch": 1709496700, "timestamp": "2024-03-03T19:25:00.000Z", "price": 146.50 }
+    { "epoch": 1709496400, "price": 86.72 },
+    { "epoch": 1709496700, "price": 87.50 }
   ],
   "minutes": 60,
   "historyPath": "/tmp/sol_price.txt"
 }
 ```
 
-**trend values:** `"bullish"` | `"bearish"` | `"flat"` (flat = within ±0.5% of window open)
-
-**sample_interval_minutes:** 5 (≤120 min window) · 10 (≤720 min) · 60 (>720 min)
+**trend values:** `"bullish"` | `"bearish"` | `"flat"` (flat = within ±0.5%)
 
 ---
 
@@ -135,20 +126,18 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical [coinId] [days]
 {
   "success": true,
   "coinId": "solana",
-  "days": 7,
-  "prices": [[1709500000000, 145.23], [1709503600000, 146.10]],
-  "market_caps": [[1709500000000, 63200000000], ...],
+  "days": 1,
+  "prices": [[1709500000000, 88.42], ...],
+  "market_caps": [[1709500000000, 38200000000], ...],
   "total_volumes": [[1709500000000, 1820000000], ...]
 }
 ```
 
-Each array entry is `[timestamp_ms, value_usd]`.
-
 ---
 
-## signal — RSI/MACD/Bollinger/Volume composite
+## signal — RSI/MACD/Bollinger/EMA/Volume composite
 
-Fetches live price data from Pyth Network + CoinGecko volume, runs four technical
+Fetches live price data from Pyth Network + CoinGecko volume, runs five technical
 indicators, and returns a weighted composite prediction.
 
 ```bash
@@ -156,22 +145,25 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js signal [symbol] [minutes]
 ```
 
 `symbol`: `sol` (default) | `btc` | `eth`
-`minutes`: look-back window 35–1440 (default: 120). MACD requires ≥35 data points.
+`minutes`: look-back window 35–1440 (default: 120).
+
+**Indicator weights:** MACD 28% · RSI 22% · Bollinger 22% · Volume 15% · EMA crossover 13%
 
 **Output:**
 ```json
 {
   "success": true,
   "symbol": "SOL",
-  "current_price": 145.23,
-  "timestamp": "2024-03-03T20:26:40.000Z",
-  "prediction": "bullish",
-  "confidence": 0.62,
+  "current_price": 88.42,
+  "timestamp": "2026-03-15T11:00:00.000Z",
+  "prediction": "bearish",
+  "confidence": 0.72,
   "signals": {
-    "rsi":       { "value": 28.4,  "signal": "oversold",  "weight": 0.25 },
-    "macd":      { "macd": 0.42,   "signal_line": 0.18, "histogram": 0.24, "signal": "bullish", "weight": 0.3 },
-    "bollinger": { "upper": 148.1, "middle": 144.5, "lower": 140.9, "position": "below_lower", "signal": "bullish", "weight": 0.25 },
-    "volume":    { "current_volume": 1820000000, "avg_volume": 1200000000, "ratio": 1.52, "signal": "high", "weight": 0.2 }
+    "rsi":       { "value": 99.7,  "signal": "overbought", "weight": 0.22 },
+    "macd":      { "macd": -0.09,  "signal_line": -0.02, "histogram": -0.08, "signal": "bearish", "weight": 0.28 },
+    "bollinger": { "upper": 87.88, "middle": 87.07, "lower": 86.26, "position": "above_upper", "signal": "bearish", "weight": 0.22 },
+    "volume":    { "current_volume": 1830000000, "avg_volume": 2360000000, "ratio": 0.78, "signal": "normal", "weight": 0.15 },
+    "ema_crossover": { "fast_ema": 88.10, "slow_ema": 87.45, "gap_pct": 0.74, "signal": "bullish", "weight": 0.13 }
   },
   "data_points": 121,
   "minutes": 120
@@ -179,41 +171,123 @@ node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js signal [symbol] [minutes]
 ```
 
 **prediction values:** `"bullish"` | `"bearish"` | `"neutral"`
+**confidence:** 0–1 (higher = stronger signal agreement)
 
-**confidence:** 0–1 (absolute normalized weighted score across all indicators)
+---
 
-**Indicator weights:** MACD 30% · RSI 25% · Bollinger 25% · Volume 20%
+## levels — Pivot points, S/R levels, swing highs/lows
+
+Derives key price levels from CoinGecko 24hr hourly data using standard pivot point
+formula. Also detects recent swing highs/lows and EMA levels.
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js levels [symbol]
+```
+
+`symbol`: `sol` (default) | `btc` | `eth`
+
+**Output:**
+```json
+{
+  "success": true,
+  "symbol": "SOL",
+  "current_price": 88.42,
+  "timestamp": "2026-03-15T11:00:00.000Z",
+  "h24_high": 88.77,
+  "h24_low": 86.72,
+  "h24_close": 88.42,
+  "pivot": 87.97,
+  "r1": 89.22,
+  "r2": 90.02,
+  "r3": 91.27,
+  "s1": 86.72,
+  "s2": 85.92,
+  "s3": 84.67,
+  "ema20": 87.65,
+  "ema50": 87.12,
+  "local_highs": [88.77, 88.20],
+  "local_lows": [86.72, 87.10],
+  "position": "near_resistance",
+  "nearest_resistance": 89.22,
+  "nearest_support": 87.97,
+  "levels": [
+    { "price": 91.27, "label": "R3", "type": "resistance", "distance_pct": 3.22 },
+    { "price": 90.02, "label": "R2", "type": "resistance", "distance_pct": 1.81 },
+    { "price": 89.22, "label": "R1", "type": "resistance", "distance_pct": 0.90 },
+    { "price": 88.77, "label": "SwingHigh", "type": "resistance", "distance_pct": 0.40 },
+    { "price": 87.97, "label": "Pivot", "type": "pivot", "distance_pct": -0.51 },
+    ...
+  ]
+}
+```
+
+**position values:** `"near_resistance"` | `"near_support"` | `"midrange"`
+(near = within 1% of a key level)
+
+**Pivot formulas:**
+- P = (H + L + C) / 3
+- R1 = 2P − L, R2 = P + (H − L), R3 = H + 2(P − L)
+- S1 = 2P − H, S2 = P − (H − L), S3 = L − 2(H − P)
+
+---
+
+## sentiment — Fear & Greed + global market data
+
+Fetches the Crypto Fear & Greed Index (alternative.me) and CoinGecko global market stats.
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js sentiment
+```
+
+**Output:**
+```json
+{
+  "success": true,
+  "timestamp": "2026-03-15T11:00:00.000Z",
+  "fear_greed": { "value": 15, "classification": "Extreme Fear", "timestamp": "..." },
+  "fear_greed_yesterday": { "value": 18, "classification": "Extreme Fear", "timestamp": "..." },
+  "fear_greed_trend": "worsening",
+  "btc_dominance_pct": 58.4,
+  "total_market_cap_usd": 2800000000000,
+  "total_volume_24h_usd": 98000000000,
+  "active_cryptocurrencies": 14200,
+  "market_cap_change_24h_pct": 1.24,
+  "sentiment_bias": "bullish",
+  "summary": "Fear & Greed 15/100 (Extreme Fear), trending worsening, BTC dominance 58.4%, market cap +1.2% 24h. Sentiment bias: BULLISH."
+}
+```
+
+**sentiment_bias:** contrarian-adjusted — Extreme Fear (<25) → `"bullish"`, Extreme Greed (>75) → `"bearish"`
+**fear_greed_trend:** `"improving"` | `"worsening"` | `"stable"`
 
 ---
 
 ## Common workflows
 
-### Build a price history file (call once per minute via cron or loop)
+### Full trade signal (run in parallel)
 ```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js signal sol 120
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js levels sol
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js sentiment
 node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js fetch /tmp/sol_price.txt
 ```
 
-### Analyze the last hour
+### Get 24hr pivot levels for SOL
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js analysis /tmp/sol_price.txt 60
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js levels sol
 ```
 
-### Analyze the last 24 hours
+### Check market sentiment
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js analysis /tmp/sol_price.txt 1440
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js sentiment
 ```
 
-### Get 7-day historical chart for Bitcoin
+### Analyze last 4 hours from local history
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js analysis /tmp/sol_price.txt 240
+```
+
+### 7-day historical chart for Bitcoin
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js historical bitcoin 7
-```
-
-### Run composite signal for SOL (2-hour window)
-```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js signal sol 120
-```
-
-### Run composite signal for BTC (4-hour window)
-```bash
-node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js signal btc 240
 ```

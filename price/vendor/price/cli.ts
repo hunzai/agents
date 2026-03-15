@@ -8,6 +8,8 @@ import { fetchCommand } from "./src/commands/fetch.js";
 import { analysisCommand } from "./src/commands/analysis.js";
 import { historicalCommand } from "./src/commands/historical.js";
 import { signalCommand } from "./src/commands/signal.js";
+import { levelsCommand } from "./src/commands/levels.js";
+import { sentimentCommand } from "./src/commands/sentiment.js";
 
 const USAGE = `
 Solana Price CLI
@@ -16,7 +18,9 @@ Usage:
   cli.js fetch <output-path> [options]       Fetch current price → append to file
   cli.js analysis <path> [minutes]           Analyze local price history file
   cli.js historical [coinId] [days]          CoinGecko historical OHLCV data
-  cli.js signal [symbol] [minutes]           RSI/MACD/Bollinger/Volume composite signal
+  cli.js signal [symbol] [minutes]           RSI/MACD/Bollinger/EMA/Volume composite signal
+  cli.js levels [symbol]                     Pivot points, S/R levels, swing highs/lows
+  cli.js sentiment                           Fear & Greed index + global market data
 
 fetch options:
   --source pyth|gecko   Price source (default: pyth, falls back to gecko)
@@ -26,6 +30,9 @@ fetch options:
 signal options:
   symbol                sol | btc | eth (default: sol)
   minutes               Look-back window, 35–1440 (default: 120)
+
+levels options:
+  symbol                sol | btc | eth (default: sol)
 
 Examples:
   cli.js fetch /tmp/sol_price.txt
@@ -38,6 +45,9 @@ Examples:
   cli.js signal
   cli.js signal sol 240
   cli.js signal btc 120
+  cli.js levels
+  cli.js levels sol
+  cli.js sentiment
 
 Env:
   COINGECKO_API_KEY     Optional demo API key (raises rate limits)
@@ -156,6 +166,21 @@ async function main(): Promise<void> {
     }
 
     const result = await signalCommand({ symbol, minutes });
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(result.success ? 0 : 1);
+  }
+
+  // ── levels ─────────────────────────────────────────────────────────────────
+  if (command === "levels") {
+    const symbol = positionals[0] ?? "sol";
+    const result = await levelsCommand({ symbol });
+    console.log(JSON.stringify(result, null, 2));
+    process.exit(result.success ? 0 : 1);
+  }
+
+  // ── sentiment ──────────────────────────────────────────────────────────────
+  if (command === "sentiment") {
+    const result = await sentimentCommand();
     console.log(JSON.stringify(result, null, 2));
     process.exit(result.success ? 0 : 1);
   }
