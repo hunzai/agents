@@ -8,6 +8,7 @@ Claude Code plugins and skills for content creation and Solana trading.
 .claude/skills/          Workflow skills (orchestrate plugins)
   content-creator/         audio → story → Urdu → images → audio
   leverage-trade/          market analysis → trade execution
+  travel-agent/            search Google Flights via browser
 
 elevenlabs/              Plugin: speech-to-text, text-to-speech
 replicate/               Plugin: image generation + image-to-video
@@ -52,6 +53,15 @@ Uses price (signal, levels, sentiment) and trader (jupiter perps) plugins.
 
 ```
 /leverage-trade
+```
+
+### travel-agent
+
+Search Google Flights for cheap and direct flights between any two cities.
+Uses the browser plugin to automate the search.
+
+```
+/travel-agent Berlin to Lisbon Mar 28 return Apr 8 direct flights
 ```
 
 ## Example Prompts

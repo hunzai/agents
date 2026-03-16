@@ -18,6 +18,7 @@ Use existing plugins and CLIs. Never write custom scripts or HTTP calls.
 |-------|-----------|--------------|
 | content-creator | `/content-creator <audio> <output-dir>` | elevenlabs, replicate |
 | leverage-trade | `/leverage-trade` | price, trader |
+| travel-agent | `/travel-agent <from> to <to> <dates>` | browser |
 
 ## Plugin Skills
 
@@ -35,4 +36,4 @@ Use existing plugins and CLIs. Never write custom scripts or HTTP calls.
 - Stop immediately if required API keys are missing — report which key and where to add it
 
 ## Self Improving Approach
-When you are working on plugins or skill and we run into errors or issues learn from those and keep improving. 
+When you are working on plugins or skill and we run into errors or issues learn from those and keep improving.

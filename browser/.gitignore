@@ -1,0 +1,11 @@
+# Runtime session data (created on first browser launch)
+.session/
+
+# Auto-captured screenshots, session logs, and recordings
+screenshots/
+logs/
+recordings/
+
+# Node build artifacts
+vendor/browser/node_modules/
+vendor/browser/dist/

@@ -11,6 +11,7 @@ const SESSION_FILE = join(SESSION_DIR, "session.json");
 const PROFILE_DIR = join(SESSION_DIR, "profile");
 export const SCREENSHOTS_DIR = join(PLUGIN_ROOT, "screenshots");
 export const LOGS_DIR = join(PLUGIN_ROOT, "logs");
+export const RECORDINGS_DIR = join(PLUGIN_ROOT, "recordings");
 export const PLUGIN_ROOT_PATH = PLUGIN_ROOT;
 
 interface SessionInfo {
@@ -103,18 +104,28 @@ export async function launch(headless = true): Promise<Browser> {
   return await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
 }
 
-export async function getPage(browser: Browser): Promise<import("playwright-core").Page> {
+export async function getPage(
+  browser: Browser,
+  videoDir?: string,
+): Promise<import("playwright-core").Page> {
   const contexts = browser.contexts();
   for (const ctx of contexts) {
     const pages = ctx.pages();
     if (pages.length > 0) return pages[0];
   }
 
-  const context = await browser.newContext({
+  const contextOptions: Record<string, unknown> = {
     viewport: { width: 1280, height: 720 },
     userAgent:
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  });
+  };
+
+  if (videoDir) {
+    if (!existsSync(videoDir)) mkdirSync(videoDir, { recursive: true });
+    contextOptions.recordVideo = { dir: videoDir, size: { width: 1280, height: 720 } };
+  }
+
+  const context = await browser.newContext(contextOptions);
   return await context.newPage();
 }
 
@@ -126,6 +137,21 @@ export async function closeBrowser(): Promise<void> {
   }
 
   if (isProcessAlive(session.pid)) {
+    try {
+      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${session.port}`);
+      for (const ctx of browser.contexts()) {
+        const pages = ctx.pages();
+        for (const page of pages) {
+          const video = page.video();
+          if (video) {
+            const path = await video.path().catch(() => null);
+            if (path) console.log(`Video saved: ${path}`);
+          }
+        }
+        await ctx.close();
+      }
+    } catch { /* connection may fail if already dying */ }
+
     try {
       process.kill(session.pid, "SIGTERM");
     } catch { /* already gone */ }

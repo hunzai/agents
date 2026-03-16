@@ -1,17 +1,30 @@
-import { launch, getPage, closeBrowser, isSessionActive, SCREENSHOTS_DIR, LOGS_DIR } from "./session.js";
+import { launch, getPage, closeBrowser, isSessionActive, SCREENSHOTS_DIR, LOGS_DIR, RECORDINGS_DIR } from "./session.js";
 import { takeSnapshot, getElementByRef } from "./snapshot.js";
 import { resolve, dirname, join } from "node:path";
 import { mkdirSync, existsSync, appendFileSync, readdirSync } from "node:fs";
 
 const rawArgs = process.argv.slice(2);
-const sessionIdx = rawArgs.indexOf("--session");
+
 let sessionId: string | null = null;
+const sessionIdx = rawArgs.indexOf("--session");
 if (sessionIdx !== -1) {
   sessionId = rawArgs[sessionIdx + 1] || null;
   rawArgs.splice(sessionIdx, 2);
 }
 
+let recordEnabled = false;
+const recordIdx = rawArgs.indexOf("--record");
+if (recordIdx !== -1) {
+  recordEnabled = true;
+  rawArgs.splice(recordIdx, 1);
+}
+
 const [command, ...args] = rawArgs;
+
+function getVideoDir(): string | undefined {
+  if (!recordEnabled) return undefined;
+  return getSessionDir(RECORDINGS_DIR);
+}
 
 function getSessionDir(base: string): string {
   if (sessionId) return join(base, sessionId);
@@ -73,7 +86,8 @@ Commands:
   close                   Close browser session
 
 Options:
-  --session <id>          Group screenshots/logs under a session ID`);
+  --session <id>          Group screenshots/logs/recordings under a session ID
+  --record                Record browser session as video (saved on close)`);
   process.exit(1);
 }
 
@@ -87,7 +101,9 @@ async function run(): Promise<void> {
       if (!url.startsWith("http")) url = `https://${url}`;
 
       const browser = await launch();
-      const page = await getPage(browser);
+      const vDir = getVideoDir();
+      const page = await getPage(browser, vDir);
+      if (vDir) console.log(`Recording to: ${vDir}`);
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
       await page.waitForTimeout(1000);
       console.log(`Navigated to: ${page.url()}`);
@@ -96,7 +112,7 @@ async function run(): Promise<void> {
       console.log("\n--- Page Snapshot ---");
       console.log(snap);
       const ssPath = await autoScreenshot("open");
-      logAction("open", url, ssPath);
+      logAction("open", url + (vDir ? " [recording]" : ""), ssPath);
       break;
     }
 
