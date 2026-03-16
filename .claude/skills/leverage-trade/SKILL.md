@@ -2,9 +2,9 @@
 name: leverage-trade
 description: >
   Adaptive SOL leverage trading on Jupiter Perpetuals. Uses local highs/lows,
-  volatility-adjusted leverage, tiered take-profit, and trailing stops to
-  maximize gains while protecting capital. Use when asked to trade, analyze
-  SOL, open a leveraged position, or run the trading workflow.
+  trend structure, and tiered take-profit to capture moves. Default 5x
+  leverage with wide structural stops. Use when asked to trade, analyze SOL,
+  open a leveraged position, or run the trading workflow.
 disable-model-invocation: true
 argument-hint: [collateral] [leverage]
 allowed-tools: Bash(*)
@@ -13,17 +13,21 @@ context: fork
 
 # Adaptive Leverage Trade
 
-Market scan → local structure analysis → adaptive entry → tiered exit → record.
+Market scan → structure analysis → enter → ride → exit at target → record.
 Uses price plugin CLIs for analysis and trader plugin CLIs for execution.
 
-## Safety rules (cannot be overridden)
+## Safety rules
 
-- Auto-execute trades when all conditions are met — no confirmation needed.
-- Never trade when confidence < 0.40 or signal agreement <= 2/5.
-- Never exceed 10x leverage. Default: 2 USDC collateral, 2x leverage.
+- Auto-execute trades when setup conditions are met — no confirmation needed.
+- Never exceed 10x leverage. Default: 2 USDC collateral, 5x leverage.
 - Stop if WALLET_PATH or RPC_URL is missing.
 - Never re-send a transaction if a signature was returned.
 - Never hallucinate prices — use only CLI output.
+- Volume ratio < 0.5 (thin market) → WAIT regardless of setup.
+
+With 5x on 2 USDC the position size is $10. Liquidation is ~18% away from
+entry — a very large buffer. Stops are structural, not tight. Let trades
+breathe. Do not exit early from noise.
 
 ---
 
@@ -57,14 +61,14 @@ From the combined output, construct a mental price map:
 
 ```
 Local structure (from levels + stats + analysis):
-  Swing high:    stats.last_candles.swing_high  OR levels.local_highs[0]
-  Swing low:     stats.last_candles.swing_low   OR levels.local_lows[0]
-  24h range:     stats.high - stats.low
-  Volatility:    (24h range / stats.close) * 100  → volPct
-  Dip from max:  analysis.pct_dip_from_max
+  Swing high:     stats.last_candles.swing_high OR levels.local_highs[0]
+  Swing low:      stats.last_candles.swing_low  OR levels.local_lows[0]
+  24h range:      stats.high - stats.low
+  Volatility:     (24h range / stats.close) * 100 → volPct
+  Dip from max:   analysis.pct_dip_from_max
   Rally from min: analysis.pct_high_from_min
-  Trend:         analysis.trend (bullish/bearish/flat)
-  Volume health: stats.volume_ratio (>1.0 = strong, <0.5 = thin)
+  Trend:          analysis.trend (bullish/bearish/flat)
+  Volume health:  stats.volume_ratio (>1.0 = strong, <0.5 = thin)
 
 Key levels (sorted, from levels output):
   R3 > R2 > R1 > SwingHigh > Pivot > SwingLow > S1 > S2 > S3
@@ -77,111 +81,132 @@ Key levels (sorted, from levels output):
 ls -t history/*.json 2>/dev/null | head -5
 ```
 
-Read the last 3-5 trade records. Look for:
-- Patterns in losing trades (same side, same level, same time of day)
-- Average win size vs average loss size (adjust targets accordingly)
-- If the last 2+ trades were losses, raise confidence threshold to 0.60
+Read last 3-5 records. Look for patterns in losses. If the last 3 trades
+were all losses on the same side, skip that side this run.
 
 ### Step 5: Identify trade opportunity
 
+Each setup below has its own structural conditions. When ALL conditions for
+a setup are met, the trade is valid — execute it. The composite confidence
+score from `signal` is informational context, NOT a gate. The setup rules
+already check RSI, MACD, levels, and volume directly.
+
+The only hard blocks are:
+- Volume ratio < 0.5 (thin market) → WAIT
+- No setup conditions fully met → WAIT
+
 Apply these rules in order. Take the FIRST match:
 
-**A. Dip buy (highest edge):**
-- analysis.trend = bullish OR flat
-- analysis.pct_dip_from_max >= 2.0 (price has dipped 2%+ from recent high)
-- Price is near a support level (within 1% of S1, S2, pivot, or swing low)
-- RSI < 45 (not overbought)
-- Signal prediction != bearish with confidence > 0.60
-- Action: OPEN LONG. Target: nearest resistance. Stop: below swing low.
+**A. Dip buy (buy the pullback to support):**
+- Price has dipped 1.5%+ from recent high (analysis.pct_dip_from_max >= 1.5)
+- Price is within 1% of a support level (S1, S2, pivot, swing low, or EMA20)
+- RSI < 55 (momentum has cooled)
+- Trend is not strongly bearish (analysis.trend != bearish, OR if bearish
+  then RSI < 30 which signals oversold bounce)
+- Action: OPEN LONG at market
 
-**B. Breakout long:**
-- Price just crossed above swing high or R1 (within 0.3%)
-- Volume ratio > 1.0 (breakout confirmed by volume)
-- MACD histogram > 0 and increasing
-- EMA20 > EMA50 (uptrend)
-- Action: OPEN LONG. Target: next resistance up. Stop: below breakout level.
+**B. Breakout long (ride the momentum):**
+- Price crossed above swing high or R1 (within 0.5%)
+- Volume ratio > 0.8 (enough participation)
+- EMA20 > EMA50 (uptrend structure)
+- Action: OPEN LONG at market
 
-**C. Overbought short (mean reversion):**
-- analysis.pct_high_from_min >= 3.0 (rallied 3%+ from local low)
-- Price is near a resistance level (within 1% of R1, R2, or swing high)
+**C. Trend continuation long (buy the trend dip):**
+- EMA20 > EMA50 (confirmed uptrend)
+- Price pulled back to within 0.5% of EMA20 from above
+- RSI between 40 and 65 (cooled but not bearish)
+- MACD histogram > 0 or signal line trending up
+- Action: OPEN LONG at market
+
+**D. Overbought short (mean reversion at resistance):**
+- Price rallied 3%+ from local low (analysis.pct_high_from_min >= 3.0 OR
+  24h change from stats shows 3%+ gain)
+- Price is within 1% of a resistance level (R1, R2, swing high, or 24h high)
 - RSI > 70 (overbought)
-- Volume ratio < 0.8 (rally losing steam)
-- Action: OPEN SHORT. Target: nearest support. Stop: above swing high.
+- Action: OPEN SHORT at market
+- Note: do NOT require volume to fade. Strong rallies carry volume. The
+  edge is RSI extreme + resistance confluence, not volume exhaustion.
 
-**D. Breakdown short:**
-- Price just broke below swing low or S1 (within 0.3%)
-- Volume ratio > 1.0 (breakdown confirmed)
-- MACD histogram < 0 and decreasing
-- EMA20 < EMA50 (downtrend)
-- Action: OPEN SHORT. Target: next support down. Stop: above breakdown level.
+**E. Breakdown short (ride the drop):**
+- Price broke below swing low or S1 (within 0.5%)
+- Volume ratio > 0.8 (enough participation)
+- EMA20 < EMA50 (downtrend structure)
+- Action: OPEN SHORT at market
 
-**E. No edge → WAIT:**
-- Price in midrange with no clear level proximity
-- Conflicting signals (bearish signal + bullish sentiment or vice versa)
-- Volume ratio < 0.5 (thin market — unreliable signals)
+**F. No edge → WAIT:**
+- Price in midrange with no level proximity
+- Volume ratio < 0.5 (thin market)
+- No setup conditions fully met
 - Action: WAIT. Report what to watch for.
 
-### Step 6: Set adaptive levels
+### Step 6: Set levels
 
-**Entry:**
-Place entry at the key level, not at current price. If price is 0.5%+ away
-from the ideal level, report it as "wait for pullback to $X" rather than
-chasing.
+**Entry:** At market when setup conditions are met. Do not wait for a
+perfect level when the setup is already valid — chasing precision costs
+opportunity.
 
-**Stop loss (structure-based, not percentage-based):**
-- LONG stop: below the nearest swing low or support level — whichever is
-  tighter but gives at least 1% room. Never wider than 4%.
-- SHORT stop: above the nearest swing high or resistance level — same logic.
-- If liquidation price is within 2% of stop → reduce leverage.
+**Stop loss (wide, structural — let trades breathe):**
+At 5x leverage, liquidation is ~18% from entry. Stops should use major
+structural levels, not the nearest swing:
+
+- LONG stop: below S1 or the nearest major support that gives at least
+  2% room. Use S2 if S1 is too close. Never tighter than 2%.
+- SHORT stop: above R1 or the nearest major resistance that gives at least
+  2% room. Use R2 if R1 is too close. Never tighter than 2%.
+- Absolute max stop width: 6% (still far from 18% liquidation).
+- If no structural level exists within 2-6%, use 3% flat.
 
 **Take profit (tiered):**
-- TP1 (60% of position): nearest resistance (long) or support (short)
-- TP2 (remaining 40%): next level beyond TP1
-- After TP1 is hit: move stop to entry price (breakeven) and let TP2 run.
+- TP1 (50% of position): nearest resistance (long) or support (short)
+- TP2 (remaining 50%): next level beyond TP1
+- After TP1 is hit: move stop to entry price (breakeven). The remaining
+  50% now rides risk-free toward TP2.
 
-**Risk/reward minimum:** R:R must be >= 1.5:1 for TP1 alone. If not, WAIT.
+**R:R minimum:** R:R must be >= 1.2:1 for TP1. With wide stops and 5x,
+even modest R:R turns profitable over many trades.
 
-### Step 7: Volatility-adjusted leverage
+### Step 7: Leverage selection
+
+Default is 5x. Adjust only in extreme conditions:
 
 ```
 volPct = ((stats.high - stats.low) / stats.close) * 100
 
-Low volatility  (volPct < 2%):   up to 5x allowed
-Medium volatility (2-4%):        up to 3x allowed
-High volatility (volPct > 4%):   max 2x
+Normal conditions (volPct < 6%):   5x (default)
+Extreme volatility (volPct >= 6%): 3x
 
-Within those caps, apply confidence scaling:
-  HIGH confidence (>=0.75) + R:R >= 3:1 + 4/5 agreement → use the cap
-  HIGH + R:R >= 2:1 + 3/5 → cap minus 1x (minimum 2x)
-  MEDIUM confidence → 2x regardless of volatility
-  LOW confidence → WAIT
+Exception: if user specifies a leverage in the prompt, use that instead.
 ```
+
+At 5x with 2 USDC:
+- Position size: $10
+- Liquidation (long): ~18% below entry
+- Liquidation (short): ~18% above entry
+- A 3% stop loss = $0.30 risk. A 3% gain at TP1 = $0.30 profit. Wins
+  compound quickly at 5x without meaningful liquidation risk.
 
 ### Step 8: Synthesize decision
 
-Produce one structured recommendation:
+Produce one structured block:
 
 ```
-ACTION:      OPEN LONG / OPEN SHORT / TAKE PROFIT / CLOSE / HOLD / WAIT
-Setup:       Dip buy / Breakout / Mean reversion / Breakdown
-Confidence:  HIGH (>=0.75) / MEDIUM (0.50-0.74) / LOW (<0.50)
-Agreement:   X/5 [direction]
-
+ACTION:      OPEN LONG / OPEN SHORT / CLOSE / HOLD / WAIT
+Setup:       Dip buy / Breakout / Trend continuation / Mean reversion / Breakdown
 Price:       $X.XX
-Entry:       $X.XX (level name, or "at market" if within 0.3%)
+
+Entry:       $X.XX (at market)
 Stop:        $X.XX (level name) — X.X% risk
-TP1:         $X.XX (level name, 60%) — X.X% reward
-TP2:         $X.XX (level name, 40%) — X.X% reward
+TP1:         $X.XX (level name, 50%) — X.X% reward
+TP2:         $X.XX (level name, 50%) — X.X% reward
 R:R (TP1):   X.X:1
 Collateral:  X USDC
-Leverage:    Xx (volPct X.X%, cap Xx)
+Leverage:    Xx
 
 Indicators:  RSI / MACD / Bollinger / EMA / Volume — value and reading
-Levels:      local_highs / local_lows / nearest R / nearest S / pivot
-Sentiment:   F&G XX/100, trend, BTC dom, bias
+Levels:      swing highs / swing lows / nearest R / nearest S / pivot
+Sentiment:   F&G XX/100, trend, bias
 Volatility:  volPct X.X%, 24h range $X.XX-$X.XX
 Wallet:      X.XX USDC free | N open positions
-History:     last 3 trades: W/L/W, avg win +X%, avg loss -X%
 ```
 
 ### Step 9: Manage open positions
@@ -193,29 +218,28 @@ node trader/vendor/jupiter/dist/cli.js perps pnl \
   --position-pubkey <pubkey> --current-price <price>
 ```
 
-Apply adaptive exit rules:
+**When to hold (let it ride):**
+- Position is profitable but hasn't reached TP1 → hold, keep stop
+- Position is slightly negative but above stop → hold, the wide stop
+  exists for a reason. Do not panic-close on small drawdowns.
+- Borrow fees on a $10 position are negligible — time is not the enemy.
 
-**Trailing stop (for profitable positions):**
-- PnL > 0 but below TP1: hold, keep original stop
-- PnL reached TP1 level: recommend partial close (60%), move stop to entry
-- PnL beyond TP1 heading to TP2: trail stop below last swing low (long)
-  or above last swing high (short)
-- PnL reached TP2: close remaining position
+**When to take profit:**
+- Price reached TP1 → close 50%. Move stop on remainder to entry.
+- Price reached TP2 → close everything.
+- If position is in profit and a new signal appears in the OPPOSITE
+  direction with a valid setup → close the position and open the new one.
 
-**Cut losers fast:**
-- Price hit stop level → close immediately, no averaging down
-- Liquidation within 5% of current price → close immediately
-- Position held > 4 hours with no progress toward TP1 → evaluate closing
-  (dead money in a leverage position costs borrow fees)
+**When to close at a loss:**
+- Price hit stop level → close. No averaging down, no hoping.
+- Liquidation within 8% of current price → close (something went wrong).
+- New signal in the opposite direction with a valid setup → close and flip.
 
-**Conflict detection:**
-- Open position is opposite to the new signal → close the old position first
-- Never stack same-direction positions (increases risk on same thesis)
+**Stacking rule:** one position at a time. Close before opening a new one.
 
 ### Step 10: Execute
 
-Log the full summary (entry, stop, TP1, TP2, leverage reasoning) then
-execute immediately:
+Log the summary then execute immediately:
 
 ```bash
 # LONG
@@ -233,24 +257,24 @@ node trader/vendor/jupiter/dist/cli.js perps close \
   --position-pubkey <pk>
 ```
 
-On WAIT/HOLD: log the setup being watched and at what price level to
-reconsider. Do not execute any transaction.
+On WAIT/HOLD: log what you are watching for and at what price. Do not
+execute any transaction.
 
 ### Step 11: Record keeping
 
 Write JSON to `history/YYYY-MM-DDTHH-MM-SS-[action].json`:
 
 Open record fields: timestamp, action, setup_type (dip_buy/breakout/
-mean_reversion/breakdown), symbol, side, collateral_usd, leverage,
-entry_price, stop_price, tp1_price, tp2_price, rr_ratio, position_pubkey,
-tx_signature, confidence, signal_agreement, volatility_pct, volume_ratio,
+trend_continuation/mean_reversion/breakdown), symbol, side, collateral_usd,
+leverage, entry_price, stop_price, tp1_price, tp2_price, rr_ratio,
+position_pubkey, tx_signature, volatility_pct, volume_ratio,
 indicators (rsi, macd_histogram, bollinger, ema_crossover, volume_vs_avg),
 sentiment (fear_greed, classification, btc_dominance_pct,
 market_cap_change_24h_pct, bias), levels (nearest_resistance,
 nearest_support, pivot, swing_high, swing_low, ema20, ema50), notes.
 
 Close record fields: timestamp, action, reason (tp1/tp2/stop/manual/
-time_exit/conflict), symbol, side, position_pubkey, tx_signature,
+flip/conflict), symbol, side, position_pubkey, tx_signature,
 entry_price, close_price, collateral_usd, leverage, pnl_usd, pnl_pct,
 close_fee_usd, borrow_fee_usd, net_pnl_usd, duration_minutes,
 linked_open_file.
@@ -267,4 +291,4 @@ Only write on success: true. On failure, report error and stop.
 | `RPC_URL required` | Env var missing | Add to `.env` |
 | `Insufficient price data` | Price file empty | Re-run `fetch` then `signal` |
 | `success: false` on open/close | On-chain error | Show error field, do not retry |
-| WAIT signal | Low confidence or no key level | Report reason, do not trade |
+| WAIT signal | No setup matched or thin market | Report reason, do not trade |

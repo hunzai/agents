@@ -23,6 +23,11 @@
       "name": "replicate",
       "source": "./replicate",
       "description": "Replicate AI media — image generation (seedream, banana) and image-to-video (wan-video)"
+    },
+    {
+      "name": "browser",
+      "source": "./browser",
+      "description": "Headless browser automation — navigate, click, fill, screenshot any website using Playwright Chromium"
     }
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "name": "openclaw-browser",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "browse": "node dist/cli.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.52.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

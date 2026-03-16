@@ -13,6 +13,7 @@ elevenlabs/              Plugin: speech-to-text, text-to-speech
 replicate/               Plugin: image generation + image-to-video
 price/                   Plugin: SOL price analysis, signals, levels
 trader/                  Plugin: Jupiter Perpetuals + Spot Swap
+browser/                 Plugin: headless browser automation (Playwright)
 ```
 
 ## Installation
@@ -139,3 +140,13 @@ Commands: `fetch`, `signal`, `levels`, `sentiment`, `historical`, `stats`, `anal
 Solana trading via [Jupiter](https://jup.ag).
 
 Commands: `swap buy/sell/balance/quote`, `perps open-long/open-short/close/list/pnl`
+
+### browser
+
+Headless browser automation via [Playwright](https://playwright.dev).
+
+| Skill | Description |
+|-------|-------------|
+| browse | Open pages, click, fill, type, screenshot, extract text |
+
+Commands: `open`, `snapshot`, `click`, `fill`, `type`, `press`, `screenshot`, `text`, `scroll`, `wait`, `status`, `close`
