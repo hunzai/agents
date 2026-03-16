@@ -1,5 +1,5 @@
 import { launch, getPage, closeBrowser, isSessionActive, SCREENSHOTS_DIR, LOGS_DIR, RECORDINGS_DIR } from "./session.js";
-import { takeSnapshot, getElementByRef } from "./snapshot.js";
+import { takeSnapshot, takeFullSnapshot, getElementByRef } from "./snapshot.js";
 import { resolve, dirname, join } from "node:path";
 import { mkdirSync, existsSync, appendFileSync, readdirSync } from "node:fs";
 
@@ -68,26 +68,34 @@ function logAction(action: string, detail: string, screenshotPath?: string): voi
   appendFileSync(logFile, JSON.stringify(entry) + "\n", "utf-8");
 }
 
+async function printSnap(page: import("playwright-core").Page): Promise<void> {
+  const snap = await takeSnapshot(page);
+  console.log("\n--- Refs ---");
+  console.log(snap);
+}
+
 function usage(): never {
   console.log(`Usage: node cli.js [--session <id>] <command> [args]
 
 Commands:
-  open <url>              Navigate to URL (auto-screenshot)
-  snapshot                Print page accessibility tree with numbered refs
-  click <ref>             Click element by ref number (auto-screenshot)
-  fill <ref> <text>       Clear field and type text (auto-screenshot)
-  type <ref> <text>       Append text to field (auto-screenshot)
-  press <key>             Press keyboard key (auto-screenshot)
-  screenshot [path]       Save screenshot manually
-  text                    Extract visible text from page
-  scroll <direction>      Scroll page: up, down, top, bottom (auto-screenshot)
-  wait <ms>               Wait for specified milliseconds
-  status                  Show session status and current URL
-  close                   Close browser session
+  open <url>              Navigate to URL (snapshot + screenshot)
+  snapshot [full]         List interactive elements (add "full" for tree view)
+  click <ref>             Click element by ref (snapshot + screenshot)
+  clicktext <text>        Click by visible text (snapshot + screenshot)
+  fill <ref> <text>       Clear + type into field (snapshot + screenshot)
+  type <ref> <text>       Append text to field (snapshot + screenshot)
+  press <key>             Press key: Enter, Tab, Escape, ArrowDown (screenshot)
+  waitfortext <text>      Wait up to 5s for text to appear on page
+  screenshot [path]       Save screenshot
+  text                    Extract all visible text
+  scroll <up|down|top|bottom>  Scroll page (screenshot)
+  wait <ms>               Wait ms
+  status                  Show URL and title
+  close                   End session
 
 Options:
-  --session <id>          Group screenshots/logs/recordings under a session ID
-  --record                Record browser session as video (saved on close)`);
+  --session <id>          Group outputs under session ID
+  --record                Record video (saved on close)`);
   process.exit(1);
 }
 
@@ -106,11 +114,9 @@ async function run(): Promise<void> {
       if (vDir) console.log(`Recording to: ${vDir}`);
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
       await page.waitForTimeout(1000);
-      console.log(`Navigated to: ${page.url()}`);
+      console.log(`URL: ${page.url()}`);
       console.log(`Title: ${await page.title()}`);
-      const snap = await takeSnapshot(page);
-      console.log("\n--- Page Snapshot ---");
-      console.log(snap);
+      await printSnap(page);
       const ssPath = await autoScreenshot("open");
       logAction("open", url + (vDir ? " [recording]" : ""), ssPath);
       break;
@@ -121,10 +127,13 @@ async function run(): Promise<void> {
       const browser = await launch();
       const page = await getPage(browser);
       console.log(`URL: ${page.url()}`);
-      console.log(`Title: ${await page.title()}`);
-      const snap = await takeSnapshot(page);
-      console.log("\n--- Page Snapshot ---");
-      console.log(snap);
+      if (args[0] === "full") {
+        const snap = await takeFullSnapshot(page);
+        console.log("\n--- Full Page Tree ---");
+        console.log(snap);
+      } else {
+        await printSnap(page);
+      }
       logAction("snapshot", page.url());
       break;
     }
@@ -135,15 +144,31 @@ async function run(): Promise<void> {
       const browser = await launch();
       const page = await getPage(browser);
       const el = await getElementByRef(page, ref);
-      await el.click();
-      await page.waitForTimeout(500);
-      console.log(`Clicked ref [${ref}]`);
+      await el.scrollIntoViewIfNeeded();
+      await el.click({ timeout: 5000 });
+      await page.waitForTimeout(300);
+      console.log(`Clicked [${ref}]`);
       console.log(`URL: ${page.url()}`);
-      const snap = await takeSnapshot(page);
-      console.log("\n--- Page Snapshot ---");
-      console.log(snap);
+      await printSnap(page);
       const ssPath = await autoScreenshot(`click-${ref}`);
       logAction("click", `ref=${ref}`, ssPath);
+      break;
+    }
+
+    case "clicktext": {
+      const text = args.join(" ");
+      if (!text) { console.error("Error: text required"); process.exit(1); }
+      const browser = await launch();
+      const page = await getPage(browser);
+      const loc = page.getByText(text, { exact: false }).first();
+      await loc.scrollIntoViewIfNeeded();
+      await loc.click({ timeout: 5000 });
+      await page.waitForTimeout(300);
+      console.log(`Clicked text: "${text}"`);
+      console.log(`URL: ${page.url()}`);
+      await printSnap(page);
+      const ssPath = await autoScreenshot("clicktext");
+      logAction("clicktext", text, ssPath);
       break;
     }
 
@@ -154,9 +179,11 @@ async function run(): Promise<void> {
       const browser = await launch();
       const page = await getPage(browser);
       const el = await getElementByRef(page, ref);
+      await el.scrollIntoViewIfNeeded();
       await el.fill(text);
       await page.waitForTimeout(300);
-      console.log(`Filled ref [${ref}] with: "${text}"`);
+      console.log(`Filled [${ref}] with: "${text}"`);
+      await printSnap(page);
       const ssPath = await autoScreenshot(`fill-${ref}`);
       logAction("fill", `ref=${ref} text="${text}"`, ssPath);
       break;
@@ -169,9 +196,11 @@ async function run(): Promise<void> {
       const browser = await launch();
       const page = await getPage(browser);
       const el = await getElementByRef(page, ref);
+      await el.scrollIntoViewIfNeeded();
       await el.type(text);
       await page.waitForTimeout(300);
-      console.log(`Typed into ref [${ref}]: "${text}"`);
+      console.log(`Typed [${ref}]: "${text}"`);
+      await printSnap(page);
       const ssPath = await autoScreenshot(`type-${ref}`);
       logAction("type", `ref=${ref} text="${text}"`, ssPath);
       break;
@@ -185,8 +214,24 @@ async function run(): Promise<void> {
       await page.keyboard.press(key);
       await page.waitForTimeout(300);
       console.log(`Pressed: ${key}`);
+      await printSnap(page);
       const ssPath = await autoScreenshot(`press-${key}`);
       logAction("press", key, ssPath);
+      break;
+    }
+
+    case "waitfortext": {
+      const text = args.join(" ");
+      if (!text) { console.error("Error: text required"); process.exit(1); }
+      const browser = await launch();
+      const page = await getPage(browser);
+      try {
+        await page.getByText(text, { exact: false }).first().waitFor({ state: "visible", timeout: 5000 });
+        console.log(`Found: "${text}"`);
+      } catch {
+        console.log(`Not found after 5s: "${text}"`);
+      }
+      logAction("waitfortext", text);
       break;
     }
 
@@ -215,8 +260,7 @@ async function run(): Promise<void> {
       const browser = await launch();
       const page = await getPage(browser);
       const text = await page.evaluate(() => {
-        const body = document.body;
-        const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
           acceptNode(node) {
             const parent = node.parentElement;
             if (!parent) return NodeFilter.FILTER_REJECT;

@@ -26,7 +26,7 @@ Use existing plugins and CLIs. Never write custom scripts or HTTP calls.
 **replicate:** seedream (default images), video (image-to-video), banana (legacy images)
 **price:** price-cli (fetch, signal, levels, sentiment, historical, stats)
 **trader:** jupiter-cli (swap, perps)
-**browser:** browse (open, click, fill, type, screenshot, snapshot, scroll)
+**browser:** browse (open, click, clicktext, fill, type, screenshot, snapshot, scroll)
 
 ## Key Rules
 
