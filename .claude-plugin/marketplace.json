@@ -3,31 +3,49 @@
   "owner": {
     "name": "hunzai"
   },
+  "metadata": {
+    "description": "AI agent plugins — trading, media generation, browser automation, price analysis"
+  },
   "plugins": [
     {
       "name": "trader",
       "source": "./trader",
-      "description": "Solana trading agent powered by Jupiter Perpetuals and Swap"
+      "description": "Solana trading agent — open/close leveraged perpetual positions and spot swap SOL/USDC via Jupiter",
+      "version": "1.0.0",
+      "category": "trading",
+      "tags": ["solana", "jupiter", "perpetuals", "swap", "defi", "leverage"]
     },
     {
       "name": "price",
       "source": "./price",
-      "description": "Solana price analysis — Pyth Network real-time fetch, local price history, CoinGecko historical data"
+      "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
+      "version": "1.0.0",
+      "category": "trading",
+      "tags": ["solana", "price", "pyth", "coingecko", "technical-analysis", "signals"]
     },
     {
       "name": "elevenlabs",
       "source": "./elevenlabs",
-      "description": "ElevenLabs speech — speak text aloud, batch transcribe audio files (STT), and batch convert text to audio (TTS)"
+      "description": "ElevenLabs speech — batch transcribe audio files (STT), convert text to audio (TTS), and speak text aloud",
+      "version": "1.0.0",
+      "category": "media",
+      "tags": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"]
     },
     {
       "name": "replicate",
       "source": "./replicate",
-      "description": "Replicate AI media — image generation (seedream, banana) and image-to-video (wan-video)"
+      "description": "Replicate AI media — generate images (seedream, banana) and create videos from images (wan-video)",
+      "version": "1.0.0",
+      "category": "media",
+      "tags": ["replicate", "image", "video", "seedream", "banana", "wan-video", "generation"]
     },
     {
       "name": "browser",
       "source": "./browser",
-      "description": "Headless browser automation — navigate, click, fill, screenshot any website using Playwright Chromium"
+      "description": "Browser automation via playwright-cli — navigate, click, fill forms, take screenshots, manage sessions on any website",
+      "version": "1.0.0",
+      "category": "automation",
+      "tags": ["browser", "playwright", "automation", "web", "scraping", "screenshots", "headless"]
     }
   ]
 }

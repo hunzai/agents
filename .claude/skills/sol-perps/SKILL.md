@@ -1,10 +1,12 @@
 ---
-name: leverage-trade
+name: sol-perps
 description: >
-  Adaptive SOL leverage trading on Jupiter Perpetuals. Uses local highs/lows,
-  trend structure, and tiered take-profit to capture moves. Default 5x
-  leverage with wide structural stops. Use when asked to trade, analyze SOL,
-  open a leveraged position, or run the trading workflow.
+  SOL leveraged perpetuals on Jupiter. Uses local highs/lows, trend structure,
+  and tiered take-profit to capture moves. Default 5x leverage with wide
+  structural stops. Use when asked to trade perps, open a leveraged position,
+  or run the perpetuals trading workflow.
+metadata:
+  category: trading
 disable-model-invocation: true
 argument-hint: [collateral] [leverage]
 allowed-tools: Bash(*)

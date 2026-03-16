@@ -1,8 +1,16 @@
 {
   "name": "browser",
-  "description": "Headless browser automation — navigate, click, fill, type, screenshot any website using Playwright",
+  "description": "Browser automation via playwright-cli — navigate, click, fill forms, take screenshots, manage sessions on any website",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://github.com/hunzai/agents/tree/main/browser",
+  "keywords": ["browser", "playwright", "automation", "web", "scraping", "screenshots", "forms", "headless"],
+  "category": "automation",
+  "tokenProfile": {
+    "avgOutputTokens": 800,
+    "typicalSteps": 12
   }
 }

@@ -1,8 +1,16 @@
 {
   "name": "elevenlabs",
-  "description": "ElevenLabs speech — batch Speech-to-Text (transcribe audio files) and Text-to-Speech (generate audio from text files)",
+  "description": "ElevenLabs speech — batch transcribe audio files (STT), convert text to audio (TTS), and speak text aloud",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://github.com/hunzai/agents/tree/main/elevenlabs",
+  "keywords": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"],
+  "category": "media",
+  "tokenProfile": {
+    "avgOutputTokens": 500,
+    "typicalSteps": 3
   }
 }

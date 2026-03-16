@@ -1,8 +1,16 @@
 {
   "name": "replicate",
-  "description": "Replicate AI media — image generation (seedream, banana) and image-to-video (wan-video)",
+  "description": "Replicate AI media — generate images (seedream, banana) and create videos from images (wan-video)",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://github.com/hunzai/agents/tree/main/replicate",
+  "keywords": ["replicate", "image", "video", "seedream", "banana", "wan-video", "ai-art", "generation"],
+  "category": "media",
+  "tokenProfile": {
+    "avgOutputTokens": 150,
+    "typicalSteps": 2
   }
 }

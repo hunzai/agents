@@ -1,8 +1,16 @@
 {
   "name": "price",
-  "description": "Solana price analysis — fetch real-time prices from Pyth Network, store to file, and analyze movements with CoinGecko historical data",
+  "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://github.com/hunzai/agents/tree/main/price",
+  "keywords": ["solana", "price", "pyth", "coingecko", "technical-analysis", "rsi", "macd", "signals"],
+  "category": "trading",
+  "tokenProfile": {
+    "avgOutputTokens": 300,
+    "typicalSteps": 4
   }
 }

@@ -1,20 +1,32 @@
 # Agents
 
-Claude Code plugins and skills for content creation and Solana trading.
+Claude Code plugins and skills for trading, content creation, travel, and browser automation.
 
 ## Structure
 
 ```
-.claude/skills/          Workflow skills (orchestrate plugins)
-  content-creator/         audio → story → Urdu → images → audio
-  leverage-trade/          market analysis → trade execution
-  travel-agent/            search Google Flights via browser
+.claude/skills/          Orchestration skills (by category)
+  sol-perps/               [trading]  SOL leveraged perpetuals on Jupiter
+  sol-swap/                [trading]  simple SOL/USDC dip & high swapper
+  transcribe/              [content]  audio → text transcript
+  translate/               [content]  text → Urdu (or other language)
+  generate-images/         [content]  text prompts → images
+  generate-video/          [content]  images → short .mp4 videos
+  narrate/                 [content]  text → speech audio
+  content-creator/         [content]  full pipeline (chains above skills)
+  flight-search/           [travel]   search Google Flights via browser
+  airbnb-search/           [travel]   search Airbnb for best value stays
+  playwright-cli/          [automation] browser UI automation
+  usage/                   [utility]  plugin usage stats
 
 elevenlabs/              Plugin: speech-to-text, text-to-speech
 replicate/               Plugin: image generation + image-to-video
 price/                   Plugin: SOL price analysis, signals, levels
 trader/                  Plugin: Jupiter Perpetuals + Spot Swap
 browser/                 Plugin: headless browser automation (Playwright)
+
+skills.json              Machine-readable skill catalog (by category)
+llms.txt                 Plain-text catalog for LLM/agent discovery
 ```
 
 ## Installation
@@ -31,132 +43,108 @@ Add this repo as a marketplace, then install plugins by name:
 /plugin install price@hunzai-agents
 ```
 
-## Skills
+## Skills by Category
 
-### content-creator
+### Trading
 
-Audio → transcript → localized story → Urdu translation → 4 images → 4 videos → Urdu audio.
-Uses elevenlabs (stt, tts) and replicate (seedream, video) plugins.
-
-**Requires:** `ELEVENLABS_API_KEY`, `REPLICATE_API_TOKEN` in `.env`
-
-```
-/content-creator ./raw/money/ ./outputs/money/
-```
-
-### leverage-trade
-
-SOL market analysis → trade decision → execution with confirmation → record keeping.
-Uses price (signal, levels, sentiment) and trader (jupiter perps) plugins.
+| Skill | Description | Invoke |
+|-------|-------------|--------|
+| sol-perps | SOL leveraged perpetuals — local highs/lows, tiered TP, 5x default | `/sol-perps [collateral] [leverage]` |
+| sol-swap | Simple dip & high swapper — 1h price, 5 USDC budget, staggered entries | `/sol-swap [max-budget-usdc] [trade-size-usdc]` |
+| jupiter-cli | Jupiter swap and perpetuals CLI | `/trader:jupiter-cli` |
+| price-cli | Price fetch, signals, levels, sentiment | `/price:price-cli` |
 
 **Requires:** `WALLET_PATH`, `RPC_URL` in `.env`
 
-```
-/leverage-trade
-```
+### Content
 
-### travel-agent
+| Skill | Description | Invoke |
+|-------|-------------|--------|
+| transcribe | Audio dir → combined text transcript | `/transcribe <audio-dir> [output-dir]` |
+| translate | Text → Urdu (keeps English terms) | `/translate <input> <output> [lang]` |
+| generate-images | Text prompts → images (seedream default) | `/generate-images <prompts> <out> [--model]` |
+| generate-video | Images + prompts → short .mp4 videos | `/generate-video <images> <out>` |
+| narrate | Text → speech audio (Achar voice) | `/narrate <input> [output-dir]` |
+| content-creator | Full pipeline (chains all above) | `/content-creator <audio> <output-dir>` |
+| stt | Transcribe audio (plugin-level) | `/elevenlabs:stt <dir>` |
+| tts | Text to audio (plugin-level) | `/elevenlabs:tts <dir>` |
+| speak | Speak text aloud immediately | `/elevenlabs:speak <text>` |
+| seedream | Generate images (default model) | `/replicate:seedream <in> <out>` |
+| banana | Generate images (legacy) | `/replicate:banana <in> <out>` |
+| video | Image-to-video (plugin-level) | `/replicate:video <in> <out>` |
 
-Search Google Flights for cheap and direct flights between any two cities.
-Uses the browser plugin to automate the search.
+**Requires:** `ELEVENLABS_API_KEY`, `REPLICATE_API_TOKEN` in `.env`
 
-```
-/travel-agent Berlin to Lisbon Mar 28 return Apr 8 direct flights
-```
+### Travel
+
+| Skill | Description | Invoke |
+|-------|-------------|--------|
+| flight-search | Search Google Flights for cheap flights | `/flight-search <from> to <to> <dates> [direct]` |
+| airbnb-search | Search Airbnb for best value entire homes | `/airbnb-search <city> <checkin> <checkout> [guests] [max-price]` |
+
+### Automation
+
+| Skill | Description | Invoke |
+|-------|-------------|--------|
+| playwright-cli | Browser UI automation (click, fill, screenshot) | (auto-loaded) |
+| browse | Generic website automation | `/browser:browse <mission>` |
+
+### Utility
+
+| Skill | Description | Invoke |
+|-------|-------------|--------|
+| usage | Plugin usage stats and cost estimates | `/usage` |
+
+## Plugins
+
+### elevenlabs
+
+Speech processing powered by [ElevenLabs](https://elevenlabs.io). Default voice: Achar (`Vwq3FUaRDrPephO3Qaxs`).
+
+### replicate
+
+AI media generation powered by [Replicate](https://replicate.com). Default model: seedream (`bytedance/seedream-5-lite`).
+
+### price
+
+SOL price analysis via [Pyth Network](https://pyth.network) and [CoinGecko](https://coingecko.com). Commands: `fetch`, `signal`, `levels`, `sentiment`, `historical`, `stats`.
+
+### trader
+
+Solana trading via [Jupiter](https://jup.ag). Commands: `swap buy/sell/balance/quote`, `perps open-long/open-short/close/list/pnl`.
+
+### browser
+
+Headless browser automation via [Playwright](https://playwright.dev). Commands: `open`, `snapshot`, `click`, `fill`, `type`, `press`, `screenshot`, `scroll`.
 
 ## Example Prompts
 
 ### Content Creator
 
 ```
-Run /content-creator with these inputs:
-
-Input:  ./raw/money/
-Output: ./outputs/money/
-
-Think like a brilliant teacher explaining difficult concepts to someone
-who has never studied it by breaking it down to smaller parts and visual
-content. The output should be photos, videos, and audio that make the
-concepts click instantly.
+/content-creator ./raw/money/ ./outputs/money/
 ```
 
-### Leverage Trading
+### SOL Perpetuals
 
 ```
-Run /leverage-trade with these settings:
-
-Collateral: 2 USDC
-Max leverage: 5x (micro-trade)
-
-Think like a professional scalp trader who protects capital above
-all else. Every decision must be backed by data from the CLIs.
+/sol-perps 2 5
 ```
 
-### Automated Trading Loop
-
-Use `/loop` to run the trader on a schedule:
+### SOL Swap (dip buyer)
 
 ```
-/loop
-
-1. MARKET DATA → delegate to price-analyst agent:
-   "Fetch SOL price, analyze last 4h, run signal."
-
-2. MANAGE POSITIONS → delegate to jupiter-trader agent:
-   "List open perps, calculate PnL. Close any position at +10% or -10%."
-
-3. OPEN NEW POSITION → delegate to jupiter-trader agent:
-   Collateral 2 USDC. Skip if same direction already open or confidence < 0.55.
-   |4h change| 4-8%  → open 10x (follow signal)
-   |4h change| > 8%  → open 15x (follow signal)
-   |4h drop|  > 8% + RSI < 35 → open long 20x (mean-reversion)
-   |4h change| < 4%  → no trade
-
-4. REPORT: price, 4h change, signal, positions, actions taken.
+/sol-swap 5 2
 ```
 
-## Plugins
+### Flight Search
 
-### elevenlabs
+```
+/flight-search Berlin to Lisbon Mar 28 return Apr 8 direct
+```
 
-Speech processing powered by [ElevenLabs](https://elevenlabs.io).
+### Airbnb Search
 
-| Skill | Description |
-|-------|-------------|
-| stt | Transcribe audio files to text |
-| tts | Convert text files to audio |
-| speak | Speak text aloud and play immediately |
-
-Default voice: Achar (`Vwq3FUaRDrPephO3Qaxs`)
-
-### replicate
-
-AI media generation powered by [Replicate](https://replicate.com).
-
-| Skill | Model | Type |
-|-------|-------|------|
-| seedream (default) | bytedance/seedream-5-lite | text → image |
-| video | wan-video/wan-2.2-i2v-fast | image → video |
-| banana (legacy) | google/nano-banana-pro | text → image |
-
-### price
-
-SOL price analysis via [Pyth Network](https://pyth.network) and [CoinGecko](https://coingecko.com).
-
-Commands: `fetch`, `signal`, `levels`, `sentiment`, `historical`, `stats`, `analysis`
-
-### trader
-
-Solana trading via [Jupiter](https://jup.ag).
-
-Commands: `swap buy/sell/balance/quote`, `perps open-long/open-short/close/list/pnl`
-
-### browser
-
-Headless browser automation via [Playwright](https://playwright.dev).
-
-| Skill | Description |
-|-------|-------------|
-| browse | Open pages, click, fill, type, screenshot, extract text |
-
-Commands: `open`, `snapshot`, `click`, `fill`, `type`, `press`, `screenshot`, `text`, `scroll`, `wait`, `status`, `close`
+```
+/airbnb-search Lisbon 2026-04-01 2026-04-08 2 150
+```
