@@ -1,6 +1,6 @@
 ---
 name: playwright-cli
-description: Automates browser UI interactions — navigate, click, fill forms, read text, take screenshots. Do NOT use for API calls, network interception, or JavaScript execution. When needed use env vars EMAIL and EMAIL_PASSWORD to login
+description: Automates browser UI interactions — navigate, click, fill forms, read text, take screenshots. Do NOT use for API calls or network interception. When needed use env vars EMAIL and EMAIL_PASSWORD to login
 metadata:
   category: automation
 allowed-tools: Bash(playwright-cli:*)
@@ -12,13 +12,11 @@ This tool is for interacting with **visible UI elements only**. Read what's on t
 
 ## Hard rules
 
-1. **UI only** — click, fill, type, scroll, read snapshots. Never call APIs.
-2. **No `run-code`** — do not execute JavaScript on the page.
-3. **No `network`** — do not inspect or intercept network requests.
-4. **No `route`** — do not mock or modify network traffic.
-5. **No `eval`** — do not evaluate expressions on page elements.
-6. **No `console`** — do not read browser console logs.
-7. If data is not visible on the page, **scroll down** or **click to reveal it**. Do not try to fetch it via APIs or JS.
+1. **UI first** — prefer click, fill, type, scroll, read snapshots for all interactions.
+2. **No `network`** — do not inspect or intercept network requests.
+3. **No `route`** — do not mock or modify network traffic.
+4. **JS allowed** — use `run-code` or `eval` when needed for dynamic content, waiting for elements, or extracting text that snapshots can't reach (e.g. shadow DOM).
+5. If data is not visible on the page, **scroll down**, **click to reveal it**, or use JS to wait for it to load.
 
 ## Quick start
 
@@ -131,5 +129,6 @@ To get information from a page:
 2. `screenshot` — capture visual state
 3. `mousewheel 0 500` then `snapshot` — scroll and read more
 
-**Never** try to call APIs, intercept requests, or run JavaScript to get data.
+**Never** try to call APIs or intercept network requests to get data.
 If the page requires login, use `--persistent` or `state-load` to restore a session.
+Use `run-code` if you need to wait for dynamic content or extract text from elements snapshots can't reach.
