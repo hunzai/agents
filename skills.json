@@ -1,0 +1,213 @@
+{
+  "version": "1.0",
+  "generated": "2026-03-16",
+  "repository": "https://github.com/hunzai/agents",
+  "categories": {
+    "trading": {
+      "description": "Solana trading, price analysis, and leveraged positions",
+      "plugins": [
+        {
+          "name": "trader",
+          "description": "Solana trading agent — open/close leveraged perpetual positions and spot swap SOL/USDC via Jupiter",
+          "keywords": ["solana", "jupiter", "perpetuals", "swap", "trading", "defi", "leverage"],
+          "skills": [
+            {
+              "name": "jupiter-cli",
+              "description": "Execute trades, check balances, manage perpetual positions, fetch price data on Solana.",
+              "path": "trader/skills/jupiter-cli/SKILL.md",
+              "files": ["SKILL.md"]
+            }
+          ]
+        },
+        {
+          "name": "price",
+          "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
+          "keywords": ["solana", "price", "pyth", "coingecko", "technical-analysis", "rsi", "macd", "signals"],
+          "skills": [
+            {
+              "name": "price-cli",
+              "description": "Fetch real-time prices from Pyth, analyze movements, run RSI/MACD/Bollinger/EMA signals, compute pivot-point S/R levels, detect swing highs/lows, fetch Fear & Greed sentiment.",
+              "path": "price/skills/price-cli/SKILL.md",
+              "files": ["SKILL.md"]
+            }
+          ]
+        }
+      ],
+      "orchestration": [
+        {
+          "name": "sol-perps",
+          "description": "SOL leveraged perpetuals on Jupiter. Uses local highs/lows, trend structure, and tiered take-profit. Default 5x leverage.",
+          "path": ".claude/skills/sol-perps/SKILL.md",
+          "uses": ["price", "trader"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "sol-swap",
+          "description": "Simple SOL/USDC dip-and-high swapper. Checks last 1h price history. Max budget 5 USDC, 2 USDC per entry. Staggered entries on deeper dips/highs. Logs swaps to swap-ledger.jsonl.",
+          "path": ".claude/skills/sol-swap/SKILL.md",
+          "uses": ["price", "trader"],
+          "files": ["SKILL.md"]
+        }
+      ]
+    },
+    "content": {
+      "description": "Media creation — audio transcription, image generation, video production, translation",
+      "plugins": [
+        {
+          "name": "elevenlabs",
+          "description": "ElevenLabs speech — batch transcribe audio files (STT), convert text to audio (TTS), and speak text aloud",
+          "keywords": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"],
+          "skills": [
+            {
+              "name": "stt",
+              "description": "Transcribe a directory of audio files to individual .txt files, then combine them into one.",
+              "path": "elevenlabs/skills/stt/SKILL.md",
+              "files": ["SKILL.md"]
+            },
+            {
+              "name": "tts",
+              "description": "Convert a directory of .txt files to audio using ElevenLabs TTS.",
+              "path": "elevenlabs/skills/tts/SKILL.md",
+              "files": ["SKILL.md"]
+            },
+            {
+              "name": "speak",
+              "description": "Speak text aloud using ElevenLabs voice AI and play it immediately.",
+              "path": "elevenlabs/skills/speak/SKILL.md",
+              "files": ["SKILL.md"]
+            }
+          ]
+        },
+        {
+          "name": "replicate",
+          "description": "Replicate AI media — generate images (seedream, banana) and create videos from images (wan-video)",
+          "keywords": ["replicate", "image", "video", "seedream", "banana", "wan-video", "ai-art", "generation"],
+          "skills": [
+            {
+              "name": "seedream",
+              "description": "Generate images from .txt prompts using bytedance/seedream-5-lite. DEFAULT model — $0.035/image. Supports Urdu/Arabic text, infographics, photorealistic.",
+              "path": "replicate/skills/seedream/SKILL.md",
+              "files": ["SKILL.md"]
+            },
+            {
+              "name": "banana",
+              "description": "Generate images from .txt prompts using google/nano-banana-pro. LEGACY — prefer seedream for new work.",
+              "path": "replicate/skills/banana/SKILL.md",
+              "files": ["SKILL.md"]
+            },
+            {
+              "name": "video",
+              "description": "Generate .mp4 video from images + prompts using wan-video/wan-2.2-i2v-fast.",
+              "path": "replicate/skills/video/SKILL.md",
+              "files": ["SKILL.md"]
+            }
+          ]
+        }
+      ],
+      "orchestration": [
+        {
+          "name": "transcribe",
+          "description": "Transcribe audio files to text. Directory of audio → individual .txt → combined transcript.txt.",
+          "path": ".claude/skills/transcribe/SKILL.md",
+          "uses": ["elevenlabs"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "translate",
+          "description": "Translate text to another language (default: Urdu). Keeps English technical terms. Optimized for TTS output.",
+          "path": ".claude/skills/translate/SKILL.md",
+          "uses": [],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "generate-images",
+          "description": "Generate images from .txt prompt files. Default model: seedream ($0.035/img). Supports infographics, illustrations, photorealistic.",
+          "path": ".claude/skills/generate-images/SKILL.md",
+          "uses": ["replicate"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "generate-video",
+          "description": "Generate short .mp4 videos from images + prompt .txt files using wan-video on Replicate.",
+          "path": ".claude/skills/generate-video/SKILL.md",
+          "uses": ["replicate"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "narrate",
+          "description": "Convert text to speech audio using ElevenLabs TTS. Default voice: Achar, model: eleven_multilingual_v2.",
+          "path": ".claude/skills/narrate/SKILL.md",
+          "uses": ["elevenlabs"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "content-creator",
+          "description": "Full content pipeline chaining modular skills: transcribe → story → translate → generate-images → generate-video → narrate.",
+          "path": ".claude/skills/content-creator/SKILL.md",
+          "uses": ["elevenlabs", "replicate"],
+          "files": ["SKILL.md"]
+        }
+      ]
+    },
+    "travel": {
+      "description": "Flight search, accommodation booking, and trip planning via browser automation",
+      "plugins": [],
+      "orchestration": [
+        {
+          "name": "flight-search",
+          "description": "Search Google Flights for cheap flights between cities. Opens browser, fills origin/destination/dates, reads results.",
+          "path": ".claude/skills/flight-search/SKILL.md",
+          "uses": ["browser"],
+          "files": ["SKILL.md"]
+        },
+        {
+          "name": "airbnb-search",
+          "description": "Search Airbnb for best value-for-money entire homes/apartments. Compares price, rating, amenities. No single rooms.",
+          "path": ".claude/skills/airbnb-search/SKILL.md",
+          "uses": ["browser"],
+          "files": ["SKILL.md"]
+        }
+      ]
+    },
+    "automation": {
+      "description": "Browser automation and web interaction",
+      "plugins": [
+        {
+          "name": "browser",
+          "description": "Browser automation via playwright-cli — navigate, click, fill forms, take screenshots, manage sessions",
+          "keywords": ["browser", "playwright", "automation", "web", "scraping", "screenshots", "forms", "headless"],
+          "skills": [
+            {
+              "name": "browse",
+              "description": "Automate any website — open, click, fill, screenshot. Ref-based snapshots, persistent cookies.",
+              "path": "browser/skills/browse/SKILL.md",
+              "files": ["SKILL.md"]
+            }
+          ]
+        }
+      ],
+      "orchestration": [
+        {
+          "name": "playwright-cli",
+          "description": "Browser UI automation — navigate, click, fill forms, read text, take screenshots. UI only, no APIs or JS.",
+          "path": ".claude/skills/playwright-cli/SKILL.md",
+          "uses": ["browser"],
+          "files": ["SKILL.md"]
+        }
+      ]
+    },
+    "utility": {
+      "description": "Monitoring, reporting, and project management",
+      "plugins": [],
+      "orchestration": [
+        {
+          "name": "usage",
+          "description": "Show plugin and skill usage stats — total calls, tokens, and cost estimates from the PostToolUse hook log.",
+          "path": ".claude/skills/usage/SKILL.md",
+          "uses": [],
+          "files": ["SKILL.md"]
+        }
+      ]
+    }
+  }
+}
