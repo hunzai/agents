@@ -1,22 +1,27 @@
 ---
-name: solana/perps
+name: solana/open-perp
 description: >
   SOL leveraged perpetuals on Jupiter. Uses local highs/lows, trend structure,
   and tiered take-profit to capture moves. Default 5x leverage with wide
   structural stops. Use when asked to trade perps, open a leveraged position,
   or run the perpetuals trading workflow.
 metadata:
+  tier: composite
   category: solana
-disable-model-invocation: true
-argument-hint: [collateral] [leverage]
-allowed-tools: Bash(*)
-context: fork
+  inputs: "[collateral] USDC amount, [leverage] multiplier (default 5x)"
+  outputs: "Trade record in history/*.json, position on Jupiter"
+  uses: [price, trader]
+  cost-estimate: "~$0.15 (LLM analysis + on-chain tx fees)"
+  disable-model-invocation: true
+  argument-hint: [collateral] [leverage]
+  allowed-tools: Bash(*)
+  context: fork
 ---
 
 # Adaptive Leverage Trade
 
 Market scan → structure analysis → enter → ride → exit at target → record.
-Uses **solana/price** for analysis and **solana/trade** for execution.
+Uses **solana/fetch-price** for analysis and **solana/trade** for execution.
 
 ## Safety rules
 

@@ -3,49 +3,41 @@
   "owner": {
     "name": "hunzai"
   },
-  "metadata": {
-    "description": "AI agent plugins — trading, media generation, browser automation, price analysis"
-  },
   "plugins": [
     {
       "name": "trader",
       "source": "./trader",
-      "description": "Solana trading agent — open/close leveraged perpetual positions and spot swap SOL/USDC via Jupiter",
+      "description": "Solana trading — spot swap SOL/USDC and leveraged perpetual positions via Jupiter",
       "version": "1.0.0",
-      "category": "trading",
-      "tags": ["solana", "jupiter", "perpetuals", "swap", "defi", "leverage"]
+      "category": "trading"
     },
     {
       "name": "price",
       "source": "./price",
-      "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
+      "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, sentiment",
       "version": "1.0.0",
-      "category": "trading",
-      "tags": ["solana", "price", "pyth", "coingecko", "technical-analysis", "signals"]
+      "category": "trading"
     },
     {
       "name": "elevenlabs",
       "source": "./elevenlabs",
-      "description": "ElevenLabs speech — batch transcribe audio files (STT), convert text to audio (TTS), and speak text aloud",
+      "description": "ElevenLabs speech — transcribe audio (STT), convert text to audio (TTS), speak aloud",
       "version": "1.0.0",
-      "category": "media",
-      "tags": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"]
+      "category": "media"
     },
     {
       "name": "replicate",
       "source": "./replicate",
-      "description": "Replicate AI media — generate images (seedream, banana) and create videos from images (wan-video)",
+      "description": "Replicate AI media — generate images (seedream, banana) and videos (wan-video)",
       "version": "1.0.0",
-      "category": "media",
-      "tags": ["replicate", "image", "video", "seedream", "banana", "wan-video", "generation"]
+      "category": "media"
     },
     {
       "name": "browser",
       "source": "./browser",
-      "description": "Browser automation via playwright-cli — navigate, click, fill forms, take screenshots, manage sessions on any website",
+      "description": "Browser automation via playwright-cli — navigate, click, fill forms, screenshot, manage sessions",
       "version": "1.0.0",
-      "category": "automation",
-      "tags": ["browser", "playwright", "automation", "web", "scraping", "screenshots", "headless"]
+      "category": "automation"
     }
   ]
 }

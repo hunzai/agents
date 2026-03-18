@@ -1,16 +1,8 @@
 ---
-name: video/generate
 description: >
-  Generate short videos from images using Replicate wan-video. Each image is
-  paired with a .txt prompt file of the same name and turned into a .mp4 video.
-  Use when asked to create videos from images, animate images, or generate
-  video content.
-metadata:
-  category: video
-disable-model-invocation: true
-argument-hint: <images-dir> <output-dir> [--resolution 480p] [--frames 81]
+  Generate short videos from images using wan-video. Each image + paired .txt prompt becomes a .mp4.
+  Use when asked to create videos from images, animate images, or generate video content.
 allowed-tools: Bash(*)
-context: fork
 ---
 
 # Generate Video (Replicate wan-video)
@@ -43,7 +35,7 @@ If NOT SET, stop.
 ### Step 2: Build CLI (idempotent)
 
 ```bash
-bash replicate/scripts/setup.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh
 ```
 
 ### Step 3: Parse arguments
@@ -63,7 +55,7 @@ cp <prompts-dir>/*.txt <IMAGES_DIR>/
 ### Step 5: Generate
 
 ```bash
-node replicate/vendor/replicate/dist/cli.js video <IMAGES_DIR> <OUTPUT_DIR> [flags]
+node ${CLAUDE_PLUGIN_ROOT}/vendor/replicate/dist/cli.js video <IMAGES_DIR> <OUTPUT_DIR> [flags]
 ```
 
 ### Step 6: Report

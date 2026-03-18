@@ -5,9 +5,14 @@ description: >
   entire homes/apartments (no single rooms), compares price, rating, and
   amenities. Use when asked to find accommodation, places to stay, or Airbnb listings.
 metadata:
+  tier: composite
   category: travel
-argument-hint: <city> <check-in> <check-out> [guests] [max-price]
-allowed-tools: Bash(playwright-cli:*), Read(*)
+  inputs: "<city> destination, <checkin/checkout> dates, [guests] [max-price]"
+  outputs: "Top 3 Airbnb listings table + screenshots"
+  uses: [browser]
+  cost-estimate: "~$0.05 (browser automation only)"
+  argument-hint: <city> <check-in> <check-out> [guests] [max-price]
+  allowed-tools: Bash(playwright-cli:*), Read(*)
 ---
 
 # Airbnb Search

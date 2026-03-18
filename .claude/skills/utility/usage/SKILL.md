@@ -1,11 +1,16 @@
 ---
-name: usage
+name: utility/usage
 description: >
   Show plugin and skill usage stats — total calls, tokens, and cost estimates
   from the PostToolUse hook log. Zero overhead until invoked.
 metadata:
+  tier: atomic
   category: utility
-allowed-tools: Bash(cat:*), Bash(awk:*), Bash(sort:*), Bash(wc:*), Read(*)
+  inputs: "None — reads logs/usage.log"
+  outputs: "Per-plugin usage table with call counts and cost estimates"
+  uses: []
+  cost-estimate: "Free (local file read)"
+  allowed-tools: Bash(cat:*), Bash(awk:*), Bash(sort:*), Bash(wc:*), Read(*)
 ---
 
 # Usage Report

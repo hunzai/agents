@@ -1,90 +1,91 @@
-# Project Rules
+# agents — Skill & Plugin Registry
 
 Use existing plugins and CLIs. Never write custom scripts or HTTP calls.
 
-## Plugins (installed via marketplace)
+## Plugin Distribution
 
-| Plugin | Category | Purpose | CLI path |
-|--------|----------|---------|----------|
-| trader | trading | Jupiter Perpetuals + Spot Swap | `trader/vendor/jupiter/dist/cli.js` |
-| price | trading | SOL price analysis, signals, levels | `price/vendor/price/dist/cli.js` |
-| elevenlabs | content | Speech-to-text, text-to-speech | `elevenlabs/vendor/elevenlabs/dist/cli.js` |
-| replicate | content | Image generation, image-to-video | `replicate/vendor/replicate/dist/cli.js` |
-| browser | automation | Headless browser via playwright-cli | (global `playwright-cli` CLI) |
+Plugins are distributed via `claude plugin install <name>@hunzai-agents`. Each plugin bundles its own commands, agents, and CLIs.
 
-## Skills by Category
+| Plugin | Install | Commands |
+|--------|---------|----------|
+| elevenlabs | `claude plugin install elevenlabs@hunzai-agents` | `/transcribe` `/narrate` `/speak` |
+| replicate | `claude plugin install replicate@hunzai-agents` | `/image-generate` `/video-generate` |
+| trader | `claude plugin install trader@hunzai-agents` | `/trade` |
+| price | `claude plugin install price@hunzai-agents` | `/fetch-price` |
+| browser | `claude plugin install browser@hunzai-agents` | `/automate` |
 
-### Solana
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| solana/price | `/solana/price` | reference | price plugin |
-| solana/trade | `/solana/trade` | reference | trader plugin |
-| solana/perps | `/solana/perps [collateral] [leverage]` | pipeline | price, trader |
-| solana/swap | `/solana/swap [max-budget-usdc] [trade-size-usdc]` | pipeline | price, trader |
+### Plugin Internal Structure
 
-### Audio
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| audio/transcribe | `/audio/transcribe <audio-dir> [output-dir]` | pipeline | elevenlabs |
-| audio/narrate | `/audio/narrate <input> [output-dir] [--voice ID]` | pipeline | elevenlabs |
-| audio/speak | `/audio/speak [text]` | pipeline | elevenlabs |
+```
+<plugin>/
+├── .claude-plugin/plugin.json    # Manifest (validated by claude plugin validate)
+├── commands/*.md                  # Slash commands (distributed with plugin)
+├── agents/*.md                    # Subagent definitions
+├── vendor/<name>/                 # CLI source + built dist/
+└── scripts/setup.sh               # Build CLI (idempotent)
+```
 
-### Image & Video
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| image/generate | `/image/generate <prompts-dir> <output-dir> [--model seedream\|banana]` | pipeline | replicate |
-| video/generate | `/video/generate <images-dir> <output-dir> [--resolution 480p]` | pipeline | replicate |
+Commands use `${CLAUDE_PLUGIN_ROOT}` to reference plugin files.
 
-### Text
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| text/translate | `/text/translate <input-file> <output-file> [lang]` | pipeline | — |
+### Replicate Models
 
-### Content
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| content/create | `/content/create <audio-dir> <output-dir>` | pipeline | elevenlabs, replicate |
+| Model | ID | Cost | Best for |
+|-------|----|------|----------|
+| seedream (default) | `bytedance/seedream-5-lite` | $0.035/image | Text rendering, infographics |
+| banana | `google/nano-banana-pro` | ~$0.04/image | Anime, creative illustrations |
+| wan-video | wan-video | ~$0.10/video | Short clips from images |
 
-### Travel
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| travel/search-flights | `/travel/search-flights <from> to <to> <dates>` | pipeline | browser |
-| travel/search-stays | `/travel/search-stays <city> <checkin> <checkout> [guests]` | pipeline | browser |
+## Local Skills (.claude/skills/)
 
-### Browser
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| browser/automate | `/browser/automate` | reference | browser plugin |
+Composite, workflow, and standalone skills that are NOT distributed via plugins:
 
-### Utility
-| Skill | Invocation | Type | Uses |
-|-------|-----------|------|------|
-| usage | `/usage` | reference | logs/usage.log |
+| Skill | Purpose | Uses |
+|-------|---------|------|
+| solana/open-perp | Leveraged perp with technical analysis | price, trader |
+| solana/dip-swap | Auto dip-buyer with budget limits | price, trader |
+| travel/search-flights | Search Google Flights | browser |
+| travel/search-stays | Search Airbnb for stays | browser |
+| workflow/audio-story | Full pipeline: audio → story → images → video → narration | elevenlabs, replicate |
+| text/translate | Translate text (default: English → Urdu) | — |
+| utility/usage | Plugin usage stats from hook logs | — |
+
+## Rules for Adding Skills
+
+### Plugin commands vs local skills
+
+- **Atomic skills** that use a single plugin → put in `<plugin>/commands/<name>.md`
+- **Composite/workflow skills** that chain multiple plugins → put in `.claude/skills/`
+- Never duplicate: one capability, one location
+
+### No Duplication
+
+- `audio/narrate` = batch file output. `audio/speak` = interactive playback. Different purposes.
+- `image/generate` supports multiple models via `--model` flag — do NOT create separate commands per model.
+- Workflows must reference plugin commands, not inline their logic.
+
+### After Adding/Changing
+
+```bash
+# Validate plugin manifests
+claude plugin validate <plugin>/.claude-plugin/plugin.json
+
+# Update the marketplace manifest if you added a new plugin
+claude plugin validate .claude-plugin/marketplace.json
+```
+
+## Defaults
+
+- Image model: seedream (`bytedance/seedream-5-lite`)
+- Voice: Achar (`Vwq3FUaRDrPephO3Qaxs`)
+- Stop immediately if required API keys are missing
 
 ## Browser Automation
 
-Uses `playwright-cli` (Microsoft's official CLI for coding agents). NOT an MCP — direct bash commands.
+Uses `playwright-cli` — direct bash commands, not MCP.
 
-- Config: `.playwright/cli.config.json` (headless, 1280x900 viewport)
-- Sessions: `playwright-cli -s=<name> <command>` for named sessions
-- Persistent cookies: `playwright-cli -s=<name> open <url> --persistent`
-
-## Discovery
-
-- `skills.json` — machine-readable index organized by category (Cloudflare RFC format)
-- `llms.txt` — plain-text catalog for LLM/agent consumption
-- `.claude-plugin/marketplace.json` — Claude Code plugin marketplace catalog
-
-## Key Rules
-
-- Always build plugin CLIs before first use: `bash <plugin>/scripts/setup.sh`
-- Default image model: seedream (bytedance/seedream-5-lite)
-- Default voice: Achar (Vwq3FUaRDrPephO3Qaxs)
-- Stop immediately if required API keys are missing — report which key and where to add it
+- Config: `.playwright/cli.config.json` (headless, 1280x900)
+- Sessions: `playwright-cli -s=<name> <command>`
 
 ## Target Platform
 
-Claude Code CLI only. Do NOT create Cursor-specific configs (.cursor/mcp.json, .cursor/rules/, .cursor/skills/). All skills go under `.claude/skills/`.
-
-## Self Improving Approach
-When you are working on plugins or skill and we run into errors or issues learn from those and keep improving.
+Claude Code CLI only. Skills go under `.claude/skills/`, plugin commands under `<plugin>/commands/`.

@@ -1,16 +1,11 @@
 {
   "name": "price",
-  "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
+  "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
   },
   "repository": "https://github.com/hunzai/agents",
   "homepage": "https://github.com/hunzai/agents/tree/main/price",
-  "keywords": ["solana", "price", "pyth", "coingecko", "technical-analysis", "rsi", "macd", "signals"],
-  "category": "trading",
-  "tokenProfile": {
-    "avgOutputTokens": 300,
-    "typicalSteps": 4
-  }
+  "keywords": ["solana", "price", "pyth", "coingecko", "technical-analysis", "rsi", "macd", "signals"]
 }

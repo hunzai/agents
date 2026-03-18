@@ -7,10 +7,5 @@
   },
   "repository": "https://github.com/hunzai/agents",
   "homepage": "https://github.com/hunzai/agents/tree/main/elevenlabs",
-  "keywords": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"],
-  "category": "media",
-  "tokenProfile": {
-    "avgOutputTokens": 500,
-    "typicalSteps": 3
-  }
+  "keywords": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"]
 }

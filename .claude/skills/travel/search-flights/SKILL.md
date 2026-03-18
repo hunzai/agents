@@ -4,9 +4,14 @@ description: >
   Search Google Flights for cheap flights between cities using playwright-cli.
   Opens browser, fills origin/destination/dates, reads results.
 metadata:
+  tier: composite
   category: travel
-argument-hint: <from-city> to <to-city> <departure-date> [return-date] [direct]
-allowed-tools: Bash(playwright-cli:*), Read(*)
+  inputs: "<from> origin city, <to> destination, <dates> departure [return]"
+  outputs: "Top 3-5 flights table + screenshot"
+  uses: [browser]
+  cost-estimate: "~$0.05 (browser automation only)"
+  argument-hint: <from-city> to <to-city> <departure-date> [return-date] [direct]
+  allowed-tools: Bash(playwright-cli:*), Read(*)
 ---
 
 # Flight Search — Google Flights

@@ -1,16 +1,21 @@
 ---
-name: content/create
+name: workflow/audio-story
 description: >
   Full content pipeline: audio → transcript → story → Urdu translation →
   images → videos → narrated audio. Chains modular skills: audio/transcribe,
   text/translate, image/generate, video/generate, audio/narrate. Use when asked to
   process a recording into a complete content package.
 metadata:
-  category: content
-disable-model-invocation: true
-argument-hint: <audio-dir> <output-dir>
-allowed-tools: Bash(*)
-context: fork
+  tier: workflow
+  category: workflow
+  inputs: "<audio-dir> directory of audio files, <output-dir> for all outputs"
+  outputs: "transcript.txt, story.txt, urdu.txt, images/, videos/, urdu-audio/"
+  uses: [elevenlabs, replicate]
+  cost-estimate: "~$0.50-1.00 (transcription + images + video + TTS)"
+  disable-model-invocation: true
+  argument-hint: <audio-dir> <output-dir>
+  allowed-tools: Bash(*)
+  context: fork
 ---
 
 # Content Creator Pipeline

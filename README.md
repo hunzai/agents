@@ -1,150 +1,140 @@
-# Agents
+# hunzai/agents — AI Agent Plugins & Skills
 
-Claude Code plugins and skills for trading, content creation, travel, and browser automation.
+Claude Code plugins for Solana trading, content creation, browser automation, and price analysis.
 
-## Structure
-
-```
-.claude/skills/          Orchestration skills (by category)
-  sol-perps/               [trading]  SOL leveraged perpetuals on Jupiter
-  sol-swap/                [trading]  simple SOL/USDC dip & high swapper
-  transcribe/              [content]  audio → text transcript
-  translate/               [content]  text → Urdu (or other language)
-  generate-images/         [content]  text prompts → images
-  generate-video/          [content]  images → short .mp4 videos
-  narrate/                 [content]  text → speech audio
-  content-creator/         [content]  full pipeline (chains above skills)
-  flight-search/           [travel]   search Google Flights via browser
-  airbnb-search/           [travel]   search Airbnb for best value stays
-  playwright-cli/          [automation] browser UI automation
-  usage/                   [utility]  plugin usage stats
-
-elevenlabs/              Plugin: speech-to-text, text-to-speech
-replicate/               Plugin: image generation + image-to-video
-price/                   Plugin: SOL price analysis, signals, levels
-trader/                  Plugin: Jupiter Perpetuals + Spot Swap
-browser/                 Plugin: headless browser automation (Playwright)
-
-skills.json              Machine-readable skill catalog (by category)
-llms.txt                 Plain-text catalog for LLM/agent discovery
-```
-
-## Installation
+## Install Plugins
 
 ```bash
-curl -fsSL https://claude.ai/install.sh | bash
+# 1. Add the marketplace (once)
+claude plugin marketplace add hunzai/agents
+
+# 2. Install any plugin
+claude plugin install elevenlabs@hunzai-agents
+claude plugin install replicate@hunzai-agents
+claude plugin install trader@hunzai-agents
+claude plugin install price@hunzai-agents
+claude plugin install browser@hunzai-agents
 ```
 
-Add this repo as a marketplace, then install plugins by name:
+Each plugin comes with CLI tools, slash commands, and agent definitions.
+
+## Available Plugins
+
+| Plugin | Commands | Description |
+|--------|----------|-------------|
+| **elevenlabs** | `/transcribe` `/narrate` `/speak` | Speech-to-text, text-to-speech, speak aloud |
+| **replicate** | `/image-generate` `/video-generate` | AI images (seedream, banana) and videos (wan-video) |
+| **trader** | `/trade` | Spot swap SOL/USDC + leveraged perpetuals via Jupiter |
+| **price** | `/fetch-price` | Real-time prices, RSI/MACD/Bollinger signals, S/R levels |
+| **browser** | `/automate` | Browser automation via playwright-cli |
+
+## Plugin Structure
+
+Each plugin follows the Claude Code plugin standard:
+
+```
+<plugin>/
+├── .claude-plugin/
+│   └── plugin.json          # Plugin manifest (name, description, keywords)
+├── commands/                 # Slash commands (distributed with plugin)
+│   └── <command>.md          # Command definition (frontmatter + instructions)
+├── agents/                   # Subagent definitions
+│   └── <agent>.md
+├── vendor/                   # CLI source code
+│   └── <name>/
+│       ├── src/
+│       ├── dist/             # Built CLI (auto-built via setup.sh)
+│       └── package.json
+├── scripts/
+│   └── setup.sh              # Build CLI (idempotent)
+└── hooks/                    # Optional lifecycle hooks
+```
+
+## Local Skills (.claude/skills/)
+
+Composite and workflow skills that chain multiple plugins live under `.claude/skills/`:
+
+| Skill | Description | Requires |
+|-------|-------------|----------|
+| solana/open-perp | Leveraged perp with technical analysis | price + trader |
+| solana/dip-swap | Auto dip-buyer with budget limits | price + trader |
+| travel/search-flights | Search Google Flights | browser |
+| travel/search-stays | Search Airbnb for stays | browser |
+| workflow/audio-story | Full content pipeline: audio → story → images → video → narration | elevenlabs + replicate |
+| text/translate | Translate text (default: English → Urdu) | — |
+| utility/usage | Plugin usage stats from hook logs | — |
+
+These are loaded automatically when Claude Code runs inside this repo.
+
+## For Plugin Developers
+
+### Publishing to the marketplace
+
+1. Create your plugin under `<plugin-name>/`:
+   - `.claude-plugin/plugin.json` — name, description, keywords
+   - `commands/<name>.md` — slash commands with frontmatter
+   - `vendor/` — CLI tools (optional)
+   - `scripts/setup.sh` — build script (optional)
+
+2. Add your plugin to `.claude-plugin/marketplace.json`:
+   ```json
+   {
+     "name": "your-plugin",
+     "source": "./your-plugin",
+     "description": "What it does",
+     "category": "trading | media | automation | utility"
+   }
+   ```
+
+3. Validate:
+   ```bash
+   claude plugin validate your-plugin/.claude-plugin/plugin.json
+   claude plugin validate .claude-plugin/marketplace.json
+   ```
+
+4. Push to GitHub. Users install via:
+   ```bash
+   claude plugin marketplace add hunzai/agents
+   claude plugin install your-plugin@hunzai-agents
+   ```
+
+### Command format (commands/*.md)
+
+```markdown
+---
+description: >
+  One line describing when to use this command.
+allowed-tools: Bash(*)
+---
+
+# Command Title
+
+Instructions for Claude Code to execute this command.
+Use ${CLAUDE_PLUGIN_ROOT} to reference files within the plugin.
+```
+
+### Running your own marketplace
+
+Fork this repo and publish your own:
 
 ```bash
-/plugin marketplace add hunzai/agents
-/plugin install trader@hunzai-agents
-/plugin install price@hunzai-agents
+# Users add your marketplace
+claude plugin marketplace add your-github-user/your-repo
+
+# Then install plugins from it
+claude plugin install your-plugin@your-marketplace-name
 ```
 
-## Skills by Category
+## Web Marketplace
 
-### Trading
+The [web/](../web/) project provides a web UI where users describe tasks in natural language. The Master Agent reads `skills.json` to plan which plugins/skills to use and executes them via the Claude Agent SDK.
 
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| sol-perps | SOL leveraged perpetuals — local highs/lows, tiered TP, 5x default | `/sol-perps [collateral] [leverage]` |
-| sol-swap | Simple dip & high swapper — 1h price, 5 USDC budget, staggered entries | `/sol-swap [max-budget-usdc] [trade-size-usdc]` |
-| jupiter-cli | Jupiter swap and perpetuals CLI | `/trader:jupiter-cli` |
-| price-cli | Price fetch, signals, levels, sentiment | `/price:price-cli` |
-
-**Requires:** `WALLET_PATH`, `RPC_URL` in `.env`
-
-### Content
-
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| transcribe | Audio dir → combined text transcript | `/transcribe <audio-dir> [output-dir]` |
-| translate | Text → Urdu (keeps English terms) | `/translate <input> <output> [lang]` |
-| generate-images | Text prompts → images (seedream default) | `/generate-images <prompts> <out> [--model]` |
-| generate-video | Images + prompts → short .mp4 videos | `/generate-video <images> <out>` |
-| narrate | Text → speech audio (Achar voice) | `/narrate <input> [output-dir]` |
-| content-creator | Full pipeline (chains all above) | `/content-creator <audio> <output-dir>` |
-| stt | Transcribe audio (plugin-level) | `/elevenlabs:stt <dir>` |
-| tts | Text to audio (plugin-level) | `/elevenlabs:tts <dir>` |
-| speak | Speak text aloud immediately | `/elevenlabs:speak <text>` |
-| seedream | Generate images (default model) | `/replicate:seedream <in> <out>` |
-| banana | Generate images (legacy) | `/replicate:banana <in> <out>` |
-| video | Image-to-video (plugin-level) | `/replicate:video <in> <out>` |
-
-**Requires:** `ELEVENLABS_API_KEY`, `REPLICATE_API_TOKEN` in `.env`
-
-### Travel
-
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| flight-search | Search Google Flights for cheap flights | `/flight-search <from> to <to> <dates> [direct]` |
-| airbnb-search | Search Airbnb for best value entire homes | `/airbnb-search <city> <checkin> <checkout> [guests] [max-price]` |
-
-### Automation
-
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| playwright-cli | Browser UI automation (click, fill, screenshot) | (auto-loaded) |
-| browse | Generic website automation | `/browser:browse <mission>` |
-
-### Utility
-
-| Skill | Description | Invoke |
-|-------|-------------|--------|
-| usage | Plugin usage stats and cost estimates | `/usage` |
-
-## Plugins
-
-### elevenlabs
-
-Speech processing powered by [ElevenLabs](https://elevenlabs.io). Default voice: Achar (`Vwq3FUaRDrPephO3Qaxs`).
-
-### replicate
-
-AI media generation powered by [Replicate](https://replicate.com). Default model: seedream (`bytedance/seedream-5-lite`).
-
-### price
-
-SOL price analysis via [Pyth Network](https://pyth.network) and [CoinGecko](https://coingecko.com). Commands: `fetch`, `signal`, `levels`, `sentiment`, `historical`, `stats`.
-
-### trader
-
-Solana trading via [Jupiter](https://jup.ag). Commands: `swap buy/sell/balance/quote`, `perps open-long/open-short/close/list/pnl`.
-
-### browser
-
-Headless browser automation via [Playwright](https://playwright.dev). Commands: `open`, `snapshot`, `click`, `fill`, `type`, `press`, `screenshot`, `scroll`.
-
-## Example Prompts
-
-### Content Creator
-
-```
-/content-creator ./raw/money/ ./outputs/money/
+```bash
+cd ../web && npm install && npm run dev   # http://localhost:3000
 ```
 
-### SOL Perpetuals
+## Catalog
 
-```
-/sol-perps 2 5
-```
-
-### SOL Swap (dip buyer)
-
-```
-/sol-swap 5 2
-```
-
-### Flight Search
-
-```
-/flight-search Berlin to Lisbon Mar 28 return Apr 8 direct
-```
-
-### Airbnb Search
-
-```
-/airbnb-search Lisbon 2026-04-01 2026-04-08 2 150
-```
+- `skills.json` — machine-readable catalog of all skills and plugins
+- `llms.txt` — plain-text catalog for LLM consumption
+- `.claude-plugin/marketplace.json` — Claude Code marketplace manifest

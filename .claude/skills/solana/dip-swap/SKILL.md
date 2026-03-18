@@ -1,5 +1,5 @@
 ---
-name: solana/swap
+name: solana/dip-swap
 description: >
   Simple SOL/USDC dip-and-high swapper. Checks last 1 hour of price history.
   Buys SOL on dips, sells on highs with profit check (fees included).
@@ -7,18 +7,23 @@ description: >
   before next entry. Logs every swap to swap-ledger.jsonl. Use when asked to
   swap SOL, buy the dip, or run the simple spot trader.
 metadata:
+  tier: composite
   category: solana
-disable-model-invocation: true
-argument-hint: [max-budget-usdc] [trade-size-usdc]
-allowed-tools: Bash(*)
-context: fork
+  inputs: "[max-budget-usdc] total budget, [trade-size-usdc] per entry (defaults: 5, 2)"
+  outputs: "Swap entries appended to swap-ledger.jsonl"
+  uses: [price, trader]
+  cost-estimate: "~$0.10 (LLM + on-chain tx fees)"
+  disable-model-invocation: true
+  argument-hint: [max-budget-usdc] [trade-size-usdc]
+  allowed-tools: Bash(*)
+  context: fork
 ---
 
 # SOL Dip & High Swapper
 
 Simple spot swap strategy using only 1-hour price history. No indicators, no
 signals — just price action: buy dips, sell highs, protect capital.
-Uses **solana/price** for data and **solana/trade** for execution.
+Uses **solana/fetch-price** for data and **solana/trade** for execution.
 
 ## Rules
 

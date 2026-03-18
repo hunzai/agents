@@ -1,193 +1,207 @@
 {
-  "version": "2.0",
+  "version": "3.1",
   "generated": "2026-03-18",
   "repository": "https://github.com/hunzai/agents",
-  "categories": {
-    "solana": {
-      "description": "Solana trading, price analysis, and leveraged positions",
-      "plugins": [
-        {
-          "name": "trader",
-          "description": "Solana trading agent — open/close leveraged perpetual positions and spot swap SOL/USDC via Jupiter",
-          "keywords": ["solana", "jupiter", "perpetuals", "swap", "trading", "defi", "leverage"]
-        },
-        {
-          "name": "price",
-          "description": "Solana price analysis — real-time Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, Fear & Greed sentiment, CoinGecko history",
-          "keywords": ["solana", "price", "pyth", "coingecko", "technical-analysis", "rsi", "macd", "signals"]
-        }
-      ],
-      "skills": [
-        {
-          "name": "solana/price",
-          "description": "Solana price data and analysis — fetch from Pyth, analyze history, run RSI/MACD/Bollinger signals, compute S/R levels, Fear & Greed sentiment.",
-          "path": ".claude/skills/solana/price/SKILL.md",
-          "type": "reference",
-          "uses": ["price"]
-        },
-        {
-          "name": "solana/trade",
-          "description": "Solana trading via Jupiter — wallet balance, swap quotes, buy/sell SOL, perpetual positions (open/close/pnl).",
-          "path": ".claude/skills/solana/trade/SKILL.md",
-          "type": "reference",
-          "uses": ["trader"]
-        },
-        {
-          "name": "solana/perps",
-          "description": "Adaptive leveraged perpetual trading workflow. Market scan → structure analysis → enter → ride → exit. Default 5x leverage.",
-          "path": ".claude/skills/solana/perps/SKILL.md",
-          "type": "pipeline",
-          "uses": ["price", "trader"]
-        },
-        {
-          "name": "solana/swap",
-          "description": "Simple SOL/USDC dip-and-high spot swapper. 1h price history, staggered entries, profit-checked sells. Logs to swap-ledger.jsonl.",
-          "path": ".claude/skills/solana/swap/SKILL.md",
-          "type": "pipeline",
-          "uses": ["price", "trader"]
-        }
-      ]
+  "plugins": {
+    "elevenlabs": {
+      "description": "ElevenLabs speech — transcribe audio (STT), convert text to audio (TTS), speak aloud",
+      "setup": "bash elevenlabs/scripts/setup.sh",
+      "cli": "elevenlabs/vendor/elevenlabs/dist/cli.js",
+      "requires": ["ELEVENLABS_API_KEY"],
+      "install": "claude plugin install elevenlabs@hunzai-agents",
+      "commands": ["transcribe", "narrate", "speak"]
     },
+    "replicate": {
+      "description": "Replicate AI media — images (seedream, banana) and videos (wan-video)",
+      "setup": "bash replicate/scripts/setup.sh",
+      "cli": "replicate/vendor/replicate/dist/cli.js",
+      "requires": ["REPLICATE_API_TOKEN"],
+      "install": "claude plugin install replicate@hunzai-agents",
+      "commands": ["image-generate", "video-generate"]
+    },
+    "trader": {
+      "description": "Solana trading — spot swap SOL/USDC and leveraged perpetual positions via Jupiter",
+      "setup": "bash trader/scripts/setup.sh",
+      "cli": "trader/vendor/jupiter/dist/cli.js",
+      "requires": ["WALLET_PATH", "RPC_URL"],
+      "install": "claude plugin install trader@hunzai-agents",
+      "commands": ["trade"]
+    },
+    "price": {
+      "description": "Solana price analysis — Pyth prices, RSI/MACD/Bollinger signals, pivot-point levels, sentiment",
+      "setup": "bash price/scripts/setup.sh",
+      "cli": "price/vendor/price/dist/cli.js",
+      "requires": [],
+      "install": "claude plugin install price@hunzai-agents",
+      "commands": ["fetch-price"]
+    },
+    "browser": {
+      "description": "Browser automation via playwright-cli — navigate, click, fill forms, screenshot",
+      "setup": "npm install -g playwright-cli",
+      "cli": "playwright-cli",
+      "requires": [],
+      "install": "claude plugin install browser@hunzai-agents",
+      "commands": ["automate"]
+    }
+  },
+  "categories": {
     "audio": {
-      "description": "Speech-to-text, text-to-speech, and voice synthesis via ElevenLabs",
-      "plugins": [
-        {
-          "name": "elevenlabs",
-          "description": "ElevenLabs speech — batch transcribe audio files (STT), convert text to audio (TTS), and speak text aloud",
-          "keywords": ["elevenlabs", "speech", "tts", "stt", "transcription", "audio", "voice"]
-        }
-      ],
+      "description": "Speech-to-text, text-to-speech, and voice synthesis",
       "skills": [
         {
           "name": "audio/transcribe",
-          "description": "Transcribe audio files to text using ElevenLabs STT. Directory of audio → individual .txt → combined transcript.",
-          "path": ".claude/skills/audio/transcribe/SKILL.md",
-          "type": "pipeline",
-          "uses": ["elevenlabs"]
+          "description": "Transcribe audio files to text. Takes a directory of audio files, outputs per-file .txt and a combined transcript.",
+          "path": "elevenlabs/commands/transcribe.md",
+          "uses": ["elevenlabs"],
+          "cost_estimate": "~$0.01/minute of audio",
+          "source": "plugin"
         },
         {
           "name": "audio/narrate",
-          "description": "Convert text to speech audio using ElevenLabs TTS. Default voice: Achar, model: eleven_multilingual_v2.",
-          "path": ".claude/skills/audio/narrate/SKILL.md",
-          "type": "pipeline",
-          "uses": ["elevenlabs"]
+          "description": "Batch convert text files to audio files using ElevenLabs TTS. One .txt in, one audio file out.",
+          "path": "elevenlabs/commands/narrate.md",
+          "uses": ["elevenlabs"],
+          "cost_estimate": "~$0.03/1000 chars",
+          "source": "plugin"
         },
         {
           "name": "audio/speak",
-          "description": "Speak text aloud immediately using ElevenLabs. Plays audio via mpv/ffplay.",
-          "path": ".claude/skills/audio/speak/SKILL.md",
-          "type": "pipeline",
-          "uses": ["elevenlabs"]
+          "description": "Speak text aloud in real-time with immediate playback. For interactive use — not file output.",
+          "path": "elevenlabs/commands/speak.md",
+          "uses": ["elevenlabs"],
+          "cost_estimate": "~$0.01 per utterance",
+          "source": "plugin"
         }
       ]
     },
-    "image": {
-      "description": "AI image generation from text prompts via Replicate",
-      "plugins": [
-        {
-          "name": "replicate",
-          "description": "Replicate AI media — generate images (seedream, banana) and create videos from images (wan-video)",
-          "keywords": ["replicate", "image", "video", "seedream", "banana", "wan-video", "ai-art", "generation"]
-        }
-      ],
+    "media": {
+      "description": "AI image generation and image-to-video via Replicate",
       "skills": [
         {
           "name": "image/generate",
-          "description": "Generate images from .txt prompt files using Replicate. Default model: seedream ($0.035/img). Also supports banana (legacy).",
-          "path": ".claude/skills/image/generate/SKILL.md",
-          "type": "pipeline",
-          "uses": ["replicate"]
+          "description": "Generate images from text prompts. Default: seedream ($0.035/img). Also supports banana for anime style.",
+          "path": "replicate/commands/image-generate.md",
+          "uses": ["replicate"],
+          "cost_estimate": "$0.035/image (seedream)",
+          "source": "plugin"
+        },
+        {
+          "name": "video/generate",
+          "description": "Generate short videos from images using wan-video. Each image + paired .txt prompt becomes a .mp4.",
+          "path": "replicate/commands/video-generate.md",
+          "uses": ["replicate"],
+          "cost_estimate": "~$0.10/video",
+          "source": "plugin"
         }
       ]
     },
-    "video": {
-      "description": "AI video generation from images via Replicate wan-video",
-      "plugins": [],
+    "solana": {
+      "description": "Solana trading, price analysis, and leveraged positions",
       "skills": [
         {
-          "name": "video/generate",
-          "description": "Generate short .mp4 videos from images + prompt .txt files using wan-video on Replicate.",
-          "path": ".claude/skills/video/generate/SKILL.md",
-          "type": "pipeline",
-          "uses": ["replicate"]
+          "name": "solana/fetch-price",
+          "description": "Real-time SOL/USD price, technical signals (RSI/MACD/Bollinger), support/resistance levels, sentiment.",
+          "path": "price/commands/fetch-price.md",
+          "uses": ["price"],
+          "cost_estimate": "~$0.001",
+          "source": "plugin"
+        },
+        {
+          "name": "solana/trade",
+          "description": "Spot swap SOL/USDC and manage perpetual positions (open/close/pnl) via Jupiter.",
+          "path": "trader/commands/trade.md",
+          "uses": ["trader"],
+          "cost_estimate": "~$0.001 + tx fees",
+          "source": "plugin"
+        },
+        {
+          "name": "solana/open-perp",
+          "description": "Open leveraged perpetual position using technical analysis. Default 5x with structural stops.",
+          "path": ".claude/skills/solana/open-perp/SKILL.md",
+          "uses": ["price", "trader"],
+          "cost_estimate": "~$0.15",
+          "source": "skill"
+        },
+        {
+          "name": "solana/dip-swap",
+          "description": "Auto dip-buyer: checks 1h price history, buys SOL on dips, sells on highs. Max 5 USDC budget.",
+          "path": ".claude/skills/solana/dip-swap/SKILL.md",
+          "uses": ["price", "trader"],
+          "cost_estimate": "~$0.10",
+          "source": "skill"
         }
       ]
     },
     "text": {
       "description": "Text processing — translation, localization",
-      "plugins": [],
       "skills": [
         {
           "name": "text/translate",
-          "description": "Translate text to another language (default: Urdu). Keeps English technical terms. Optimized for TTS output.",
+          "description": "Translate text files between languages (default: English to Urdu). Keeps technical terms, optimized for TTS.",
           "path": ".claude/skills/text/translate/SKILL.md",
-          "type": "pipeline",
-          "uses": []
-        }
-      ]
-    },
-    "content": {
-      "description": "Multi-skill content creation pipelines",
-      "plugins": [],
-      "skills": [
-        {
-          "name": "content/create",
-          "description": "Full content pipeline: audio → transcript → story → translate → images → video → narration.",
-          "path": ".claude/skills/content/create/SKILL.md",
-          "type": "pipeline",
-          "uses": ["elevenlabs", "replicate"]
-        }
-      ]
-    },
-    "travel": {
-      "description": "Flight search, accommodation booking via browser automation",
-      "plugins": [],
-      "skills": [
-        {
-          "name": "travel/search-flights",
-          "description": "Search Google Flights for cheap flights between cities. Browser automation via playwright-cli.",
-          "path": ".claude/skills/travel/search-flights/SKILL.md",
-          "type": "pipeline",
-          "uses": ["browser"]
-        },
-        {
-          "name": "travel/search-stays",
-          "description": "Search Airbnb for best value entire homes/apartments. Compares price, rating, amenities.",
-          "path": ".claude/skills/travel/search-stays/SKILL.md",
-          "type": "pipeline",
-          "uses": ["browser"]
+          "uses": [],
+          "cost_estimate": "~$0.01",
+          "source": "skill"
         }
       ]
     },
     "browser": {
-      "description": "Browser UI automation via playwright-cli",
-      "plugins": [
-        {
-          "name": "browser",
-          "description": "Browser automation via playwright-cli — navigate, click, fill forms, take screenshots, manage sessions",
-          "keywords": ["browser", "playwright", "automation", "web", "scraping", "screenshots", "forms", "headless"]
-        }
-      ],
+      "description": "Browser UI automation and web scraping",
       "skills": [
         {
           "name": "browser/automate",
-          "description": "Browser UI automation — navigate, click, fill forms, read text, take screenshots. UI only, no APIs.",
-          "path": ".claude/skills/browser/automate/SKILL.md",
-          "type": "reference",
-          "uses": ["browser"]
+          "description": "General browser automation — navigate, click, fill forms, screenshot, manage sessions via playwright-cli.",
+          "path": "browser/commands/automate.md",
+          "uses": ["browser"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        }
+      ]
+    },
+    "travel": {
+      "description": "Flight and accommodation search via browser automation",
+      "skills": [
+        {
+          "name": "travel/search-flights",
+          "description": "Search Google Flights for cheap flights between cities. Opens browser, fills form, reads results.",
+          "path": ".claude/skills/travel/search-flights/SKILL.md",
+          "uses": ["browser"],
+          "cost_estimate": "~$0.05",
+          "source": "skill"
+        },
+        {
+          "name": "travel/search-stays",
+          "description": "Search Airbnb for best value stays. Finds entire homes, compares price/rating/amenities.",
+          "path": ".claude/skills/travel/search-stays/SKILL.md",
+          "uses": ["browser"],
+          "cost_estimate": "~$0.05",
+          "source": "skill"
+        }
+      ]
+    },
+    "workflow": {
+      "description": "Multi-skill pipelines that chain atomic skills end-to-end",
+      "skills": [
+        {
+          "name": "workflow/audio-story",
+          "description": "Audio to transcript to story to Urdu to images to videos to narrated audio. Full content pipeline.",
+          "path": ".claude/skills/workflow/audio-story/SKILL.md",
+          "uses": ["elevenlabs", "replicate"],
+          "cost_estimate": "~$0.50-1.00",
+          "source": "skill"
         }
       ]
     },
     "utility": {
-      "description": "Monitoring, reporting, and project management",
-      "plugins": [],
+      "description": "Monitoring and reporting",
       "skills": [
         {
-          "name": "usage",
-          "description": "Show plugin and skill usage stats — total calls, tokens, and cost estimates from the PostToolUse hook log.",
-          "path": ".claude/skills/usage/SKILL.md",
-          "type": "reference",
-          "uses": []
+          "name": "utility/usage",
+          "description": "Show plugin and skill usage stats from hook logs. Zero overhead until invoked.",
+          "path": ".claude/skills/utility/usage/SKILL.md",
+          "uses": [],
+          "cost_estimate": "Free",
+          "source": "skill"
         }
       ]
     }

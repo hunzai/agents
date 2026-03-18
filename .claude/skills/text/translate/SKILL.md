@@ -6,11 +6,16 @@ description: >
   for TTS output — short paragraphs, spoken number words, natural pauses.
   Use when asked to translate text, convert English to Urdu, or localize content.
 metadata:
+  tier: atomic
   category: text
-disable-model-invocation: true
-argument-hint: <input-file> <output-file> [language]
-allowed-tools: Bash(*)
-context: fork
+  inputs: "<input-file> .txt file to translate"
+  outputs: "Translated .txt file at <output-file>"
+  uses: []
+  cost-estimate: "~$0.01 (LLM only, no API calls)"
+  disable-model-invocation: true
+  argument-hint: <input-file> <output-file> [language]
+  allowed-tools: Bash(*)
+  context: fork
 ---
 
 # Translate Text

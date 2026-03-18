@@ -1,16 +1,11 @@
 {
   "name": "trader",
-  "description": "Solana trading agent — open/close leveraged perpetual positions and spot swap SOL/USDC via Jupiter",
+  "description": "Solana trading — spot swap SOL/USDC and leveraged perpetual positions via Jupiter",
   "version": "1.0.0",
   "author": {
     "name": "hunzai"
   },
   "repository": "https://github.com/hunzai/agents",
   "homepage": "https://github.com/hunzai/agents/tree/main/trader",
-  "keywords": ["solana", "jupiter", "perpetuals", "swap", "trading", "defi", "leverage"],
-  "category": "trading",
-  "tokenProfile": {
-    "avgOutputTokens": 200,
-    "typicalSteps": 5
-  }
+  "keywords": ["solana", "jupiter", "perpetuals", "swap", "trading", "defi", "leverage"]
 }

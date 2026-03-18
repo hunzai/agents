@@ -1,16 +1,8 @@
 ---
-name: image/generate
 description: >
-  Generate images from text prompt files using Replicate. Reads .txt files
-  from a directory, generates one image per prompt. Default model: seedream
-  ($0.035/image). Also supports banana (legacy). Use when asked to generate
-  images, create illustrations, or make visuals from text descriptions.
-metadata:
-  category: image
-disable-model-invocation: true
-argument-hint: <prompts-dir> <output-dir> [--model seedream|banana] [--aspect-ratio 16:9]
+  Generate images from text prompts. Default: seedream ($0.035/img). Also supports banana.
+  Use when asked to generate images, create illustrations, or make visuals.
 allowed-tools: Bash(*)
-context: fork
 ---
 
 # Generate Images (Replicate)
@@ -30,7 +22,7 @@ If NOT SET, stop.
 ### Step 2: Build CLI (idempotent)
 
 ```bash
-bash replicate/scripts/setup.sh
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh
 ```
 
 ### Step 3: Parse arguments
@@ -44,10 +36,10 @@ bash replicate/scripts/setup.sh
 
 ```bash
 # seedream (default, cheaper, better text rendering)
-node replicate/vendor/replicate/dist/cli.js seedream <PROMPTS_DIR> <OUTPUT_DIR> [flags]
+node ${CLAUDE_PLUGIN_ROOT}/vendor/replicate/dist/cli.js seedream <PROMPTS_DIR> <OUTPUT_DIR> [flags]
 
-# banana (legacy, use only if specifically requested)
-node replicate/vendor/replicate/dist/cli.js banana <PROMPTS_DIR> <OUTPUT_DIR> [flags]
+# banana (use only if specifically requested)
+node ${CLAUDE_PLUGIN_ROOT}/vendor/replicate/dist/cli.js banana <PROMPTS_DIR> <OUTPUT_DIR> [flags]
 ```
 
 Each .txt file in PROMPTS_DIR → one image in OUTPUT_DIR with same stem name.
@@ -64,8 +56,8 @@ Output:  <OUTPUT_DIR> (N images)
 
 | Model | Cost | Best for |
 |-------|------|----------|
-| seedream (default) | $0.035/img | Urdu/Arabic text, infographics, editorial |
-| banana | higher | Anime style, creative illustrations |
+| seedream (default) | $0.035/img | Text rendering, infographics, editorial |
+| banana | ~$0.04/img | Anime style, creative illustrations |
 
 ## Seedream options
 
