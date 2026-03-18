@@ -1,0 +1,11 @@
+{
+  "name": "solana-cli",
+  "description": "Solana CLI tools — create wallets, check balances, transfer SOL, track portfolio, manage accounts",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://solana.com/docs/intro/installation",
+  "keywords": ["solana", "wallet", "balance", "portfolio", "transfer", "keypair", "blockchain"]
+}

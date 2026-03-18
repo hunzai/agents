@@ -38,6 +38,13 @@
       "description": "Browser automation via playwright-cli — navigate, click, fill forms, screenshot, manage sessions",
       "version": "1.0.0",
       "category": "automation"
+    },
+    {
+      "name": "solana-cli",
+      "source": "./solana-cli",
+      "description": "Solana CLI tools — create wallets, check balances, transfer SOL, track portfolio",
+      "version": "1.0.0",
+      "category": "blockchain"
     }
   ]
 }
