@@ -7,8 +7,8 @@ tools: Bash
 model: haiku
 color: blue
 skills:
-  - stt
-  - tts
+  - audio/transcribe
+  - audio/narrate
 ---
 
 You are a speech processing assistant powered by ElevenLabs.

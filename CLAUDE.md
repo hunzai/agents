@@ -14,46 +14,52 @@ Use existing plugins and CLIs. Never write custom scripts or HTTP calls.
 
 ## Skills by Category
 
-### Trading
-| Skill | Invocation | Uses |
-|-------|-----------|------|
-| sol-perps | `/sol-perps [collateral] [leverage]` | price, trader |
-| sol-swap | `/sol-swap [max-budget-usdc] [trade-size-usdc]` | price, trader |
-| jupiter-cli | `/trader:jupiter-cli` | trader plugin |
-| price-cli | `/price:price-cli` | price plugin |
+### Solana
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| solana/price | `/solana/price` | reference | price plugin |
+| solana/trade | `/solana/trade` | reference | trader plugin |
+| solana/perps | `/solana/perps [collateral] [leverage]` | pipeline | price, trader |
+| solana/swap | `/solana/swap [max-budget-usdc] [trade-size-usdc]` | pipeline | price, trader |
+
+### Audio
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| audio/transcribe | `/audio/transcribe <audio-dir> [output-dir]` | pipeline | elevenlabs |
+| audio/narrate | `/audio/narrate <input> [output-dir] [--voice ID]` | pipeline | elevenlabs |
+| audio/speak | `/audio/speak [text]` | pipeline | elevenlabs |
+
+### Image & Video
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| image/generate | `/image/generate <prompts-dir> <output-dir> [--model seedream\|banana]` | pipeline | replicate |
+| video/generate | `/video/generate <images-dir> <output-dir> [--resolution 480p]` | pipeline | replicate |
+
+### Text
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| text/translate | `/text/translate <input-file> <output-file> [lang]` | pipeline | — |
 
 ### Content
-| Skill | Invocation | Uses |
-|-------|-----------|------|
-| transcribe | `/transcribe <audio-dir> [output-dir]` | elevenlabs |
-| translate | `/translate <input-file> <output-file> [lang]` | — |
-| generate-images | `/generate-images <prompts-dir> <output-dir>` | replicate |
-| generate-video | `/generate-video <images-dir> <output-dir>` | replicate |
-| narrate | `/narrate <input> [output-dir]` | elevenlabs |
-| content-creator | `/content-creator <audio> <output-dir>` | elevenlabs, replicate |
-| stt | `/elevenlabs:stt <audio-dir>` | elevenlabs plugin |
-| tts | `/elevenlabs:tts <input-dir>` | elevenlabs plugin |
-| speak | `/elevenlabs:speak <text>` | elevenlabs plugin |
-| seedream | `/replicate:seedream <in> <out>` | replicate plugin |
-| banana | `/replicate:banana <in> <out>` | replicate plugin |
-| video | `/replicate:video <in> <out>` | replicate plugin |
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| content/create | `/content/create <audio-dir> <output-dir>` | pipeline | elevenlabs, replicate |
 
 ### Travel
-| Skill | Invocation | Uses |
-|-------|-----------|------|
-| flight-search | `/flight-search <from> to <to> <dates>` | browser (playwright-cli) |
-| airbnb-search | `/airbnb-search <city> <checkin> <checkout> [guests]` | browser (playwright-cli) |
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| travel/search-flights | `/travel/search-flights <from> to <to> <dates>` | pipeline | browser |
+| travel/search-stays | `/travel/search-stays <city> <checkin> <checkout> [guests]` | pipeline | browser |
 
-### Automation
-| Skill | Invocation | Uses |
-|-------|-----------|------|
-| playwright-cli | (auto-loaded for browser tasks) | browser plugin |
-| browse | `/browser:browse <mission>` | browser plugin |
+### Browser
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| browser/automate | `/browser/automate` | reference | browser plugin |
 
 ### Utility
-| Skill | Invocation | Uses |
-|-------|-----------|------|
-| usage | `/usage` | logs/usage.log |
+| Skill | Invocation | Type | Uses |
+|-------|-----------|------|------|
+| usage | `/usage` | reference | logs/usage.log |
 
 ## Browser Automation
 

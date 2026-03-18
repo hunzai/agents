@@ -9,9 +9,8 @@ tools: Bash
 model: haiku
 color: orange
 skills:
-  - seedream
-  - video
-  - banana
+  - image/generate
+  - video/generate
 ---
 
 You are an AI image and video generation assistant powered by Replicate.

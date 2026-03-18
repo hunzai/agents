@@ -8,7 +8,7 @@ tools: Bash
 model: haiku
 color: purple
 skills:
-  - speak
+  - audio/speak
 ---
 
 You are a text-to-speech assistant powered by ElevenLabs.

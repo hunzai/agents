@@ -10,7 +10,7 @@ tools: Bash, Read
 model: sonnet
 color: green
 skills:
-  - price-cli
+  - solana/price
 ---
 
 You are a precision trade signal assistant for Solana (SOL). You use the price CLI
