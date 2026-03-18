@@ -44,12 +44,20 @@
       "commands": ["automate"]
     },
     "solana-cli": {
-      "description": "Solana CLI tools — create wallets, check balances, transfer SOL, track portfolio",
+      "description": "Solana CLI tools — create wallets, check balances, transfer SOL",
       "setup": "bash solana-cli/scripts/setup.sh",
       "cli": "solana",
       "requires": [],
       "install": "claude plugin install solana-cli@hunzai-agents",
-      "commands": ["wallet-create", "wallet-balance", "portfolio", "transfer", "config"]
+      "commands": ["wallet-create", "wallet-balance", "transfer", "config"]
+    },
+    "zerion": {
+      "description": "Multi-chain wallet portfolio — balances, positions, holdings across all EVM chains and Solana",
+      "setup": "bash zerion/scripts/setup.sh",
+      "cli": "zerion/vendor/zerion/dist/cli.js",
+      "requires": ["ZERION_API_KEY"],
+      "install": "claude plugin install zerion@hunzai-agents",
+      "commands": ["portfolio", "positions"]
     }
   },
   "categories": {
@@ -201,8 +209,24 @@
       ]
     },
     "wallet": {
-      "description": "Solana wallet management, balances, portfolio tracking, and transfers",
+      "description": "Wallet management, multi-chain portfolio tracking, balances, and transfers",
       "skills": [
+        {
+          "name": "wallet/portfolio",
+          "description": "Multi-chain portfolio — total value, breakdown by chain and type, 24h changes. Supports all EVM chains + Solana.",
+          "path": "zerion/commands/portfolio.md",
+          "uses": ["zerion"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        },
+        {
+          "name": "wallet/positions",
+          "description": "List all token positions in a wallet — name, symbol, chain, quantity, value, 24h change.",
+          "path": "zerion/commands/positions.md",
+          "uses": ["zerion"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        },
         {
           "name": "wallet/create",
           "description": "Create a new Solana wallet (keypair). Generates a keypair file and shows the public address.",
@@ -213,16 +237,8 @@
         },
         {
           "name": "wallet/balance",
-          "description": "Check SOL and token balance for any Solana wallet address.",
+          "description": "Check SOL and SPL token balance for a Solana wallet address using the native CLI.",
           "path": "solana-cli/commands/wallet-balance.md",
-          "uses": ["solana-cli"],
-          "cost_estimate": "Free",
-          "source": "plugin"
-        },
-        {
-          "name": "wallet/portfolio",
-          "description": "Full portfolio — SOL balance, token accounts, stake accounts, and transaction history.",
-          "path": "solana-cli/commands/portfolio.md",
           "uses": ["solana-cli"],
           "cost_estimate": "Free",
           "source": "plugin"

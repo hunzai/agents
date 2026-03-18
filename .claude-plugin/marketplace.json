@@ -42,7 +42,14 @@
     {
       "name": "solana-cli",
       "source": "./solana-cli",
-      "description": "Solana CLI tools — create wallets, check balances, transfer SOL, track portfolio",
+      "description": "Solana CLI tools — create wallets, check balances, transfer SOL",
+      "version": "1.0.0",
+      "category": "blockchain"
+    },
+    {
+      "name": "zerion",
+      "source": "./zerion",
+      "description": "Multi-chain wallet portfolio — balances, positions, and holdings across all EVM chains and Solana",
       "version": "1.0.0",
       "category": "blockchain"
     }

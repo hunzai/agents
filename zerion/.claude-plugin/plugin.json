@@ -1,0 +1,11 @@
+{
+  "name": "zerion",
+  "description": "Multi-chain wallet portfolio tracker — balances, positions, and holdings across all EVM chains and Solana via Zerion API",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://developers.zerion.io",
+  "keywords": ["zerion", "portfolio", "wallet", "multi-chain", "ethereum", "solana", "defi", "tokens", "balance"]
+}
