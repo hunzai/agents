@@ -1,7 +1,8 @@
 ---
 description: >
   Create a new Solana wallet (keypair). Generates a keypair file and shows the public address.
-  Use when asked to create a wallet, generate a keypair, or set up a new Solana account.
+  Use when asked to create a wallet, generate a keypair, set up a new Solana account, or
+  "I need a new address" — even if they don't mention Solana specifically.
 allowed-tools: Bash(solana:*), Bash(solana-keygen:*), Bash(mkdir:*), Bash(cat:*), Bash(echo:*)
 ---
 

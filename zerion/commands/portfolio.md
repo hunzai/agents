@@ -1,7 +1,8 @@
 ---
 description: >
   Show multi-chain wallet portfolio — total value, breakdown by chain and position type, 24h changes.
-  Use when asked to check portfolio, wallet value, holdings overview, or track a wallet across chains.
+  Use when asked to check portfolio, wallet value, holdings overview, track a wallet across chains,
+  or "how much is in my wallet" — even for Ethereum, Arbitrum, Polygon, or any EVM + Solana address.
 allowed-tools: Bash(*)
 ---
 

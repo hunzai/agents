@@ -13,13 +13,21 @@ Convert text to speech and play it immediately.
 
 ## Steps
 
-### Step 1: Build CLI (idempotent)
+### Step 1: Environment check
+
+```bash
+echo "ELEVENLABS: ${ELEVENLABS_API_KEY:-NOT SET}"
+```
+
+If NOT SET, stop.
+
+### Step 2: Build CLI (idempotent)
 
 ```bash
 bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh
 ```
 
-### Step 2: Speak
+### Step 3: Speak
 
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/vendor/elevenlabs/dist/cli.js speak $ARGUMENTS

@@ -1,7 +1,8 @@
 ---
 description: >
   Real-time SOL/USD price, technical signals (RSI/MACD/Bollinger), support/resistance levels, sentiment.
-  Use when asked about SOL price, market signals, or market sentiment.
+  Use when asked about SOL price, market signals, market sentiment, crypto analysis, or whether
+  to buy/sell — even if they just ask "what's the price" or "is now a good time to trade".
 allowed-tools: Bash(*)
 ---
 
@@ -10,6 +11,12 @@ allowed-tools: Bash(*)
 **Binary:** `node ${CLAUDE_PLUGIN_ROOT}/vendor/price/dist/cli.js <command>`
 
 All commands output JSON to stdout. Build first: `bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh`
+
+## Gotchas
+
+- Always use `NODE_OPTIONS="--dns-result-order=ipv4first"` if fetch fails
+- `signal` and `levels` require at least 30 minutes of price history — run `fetch` first
+- `historical` calls CoinGecko which rate-limits at ~30 req/min — cache results
 
 ## Commands
 

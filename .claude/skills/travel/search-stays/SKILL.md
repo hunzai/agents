@@ -3,7 +3,8 @@ name: travel/search-stays
 description: >
   Search Airbnb for best value-for-money stays using playwright-cli. Finds
   entire homes/apartments (no single rooms), compares price, rating, and
-  amenities. Use when asked to find accommodation, places to stay, or Airbnb listings.
+  amenities. Use when asked to find accommodation, places to stay, Airbnb listings,
+  or "where should I stay in X" — even if they don't mention Airbnb specifically.
 metadata:
   tier: composite
   category: travel
@@ -18,6 +19,7 @@ metadata:
 # Airbnb Search
 
 Uses `playwright-cli` to search Airbnb and find the best value entire homes.
+Uses `-q --no-screenshot` for intermediate actions to minimize token usage.
 
 ## Step 1: Parse arguments
 
@@ -29,50 +31,58 @@ Extract: CITY, CHECK_IN (YYYY-MM-DD), CHECK_OUT (YYYY-MM-DD), GUESTS (default 2)
 playwright-cli -s=airbnb open "https://www.airbnb.de/s/$CITY/homes?checkin=$CHECK_IN&checkout=$CHECK_OUT&adults=$GUESTS&room_types%5B%5D=Entire%20home%2Fapt&l10n_override=en" --persistent
 ```
 
-## Step 3: Handle cookie consent
+## Step 3: Handle popups
+
+If snapshot shows cookie consent or login modal, dismiss them:
 
 ```bash
-playwright-cli -s=airbnb click <ref of accept/agree button>
+playwright-cli -s=airbnb click <ref of accept/close button> -q --no-screenshot
+playwright-cli -s=airbnb snapshot
 ```
 
-## Step 4: Close login popup
+Repeat if another popup appears.
 
-If a login modal appears, dismiss it:
-
-```bash
-playwright-cli -s=airbnb click <ref of close/X button on modal>
-```
-
-## Step 5: Verify filters
+## Step 4: Verify filters and sort
 
 Confirm "Entire home/apt" is active. Apply MAX_PRICE if given.
-
-## Step 6: Sort by best value
-
 Prefer sorting by price (low to high) or "Top rated" if available.
+Use `-q --no-screenshot` for filter clicks:
 
-## Step 7: Read listings
+```bash
+playwright-cli -s=airbnb click <ref of filter/sort> -q --no-screenshot
+playwright-cli -s=airbnb click <ref of option> -q --no-screenshot
+playwright-cli -s=airbnb snapshot
+```
+
+## Step 5: Read listings
 
 Scroll and read listing cards (title, rating, price, amenities, superhost).
 
 ```bash
-playwright-cli -s=airbnb mousewheel 0 800
+playwright-cli -s=airbnb scroll down -q --no-screenshot
+playwright-cli -s=airbnb scroll down -q --no-screenshot
 playwright-cli -s=airbnb snapshot
 ```
 
 Repeat up to 3 times to gather ~15-20 listings.
 
-## Step 8: Inspect top candidates
+## Step 6: Inspect top candidates
 
-Click into 3-5 best listings for full details:
+Click into 3 best listings for full details. Use `-q --no-screenshot` for navigation,
+screenshot only the listing detail page:
 
 ```bash
-playwright-cli -s=airbnb click <ref of listing card>
-playwright-cli -s=airbnb screenshot --filename=browser/output/airbnb-candidate-1.png
-playwright-cli -s=airbnb go-back
+playwright-cli -s=airbnb click <ref of listing card> -q --no-screenshot
+playwright-cli -s=airbnb wait 1000
+playwright-cli -s=airbnb screenshot
+playwright-cli -s=airbnb snapshot
+# Read details, then go back
+playwright-cli -s=airbnb press Alt+ArrowLeft -q --no-screenshot
+playwright-cli -s=airbnb wait 1000
+playwright-cli -s=airbnb snapshot
 ```
 
-## Step 9: Score and rank
+## Step 7: Score and rank
 
 | Factor | Weight |
 |--------|--------|
@@ -85,7 +95,7 @@ playwright-cli -s=airbnb go-back
 
 Exclude: single rooms, below 4.0 rating, fewer than 5 reviews.
 
-## Step 10: Report
+## Step 8: Report
 
 Present top 3 recommendations:
 
@@ -94,7 +104,7 @@ Present top 3 recommendations:
 
 Include direct Airbnb links, total cost, best overall pick, and budget pick.
 
-## Step 11: Close
+## Step 9: Close
 
 ```bash
 playwright-cli -s=airbnb close
@@ -102,8 +112,9 @@ playwright-cli -s=airbnb close
 
 ## Rules
 
-1. Read the snapshot file after every command
-2. Use `fill` for text fields
-3. Execute without asking user permission
-4. NEVER recommend single rooms or shared spaces
-5. Take screenshots of top candidates
+1. Use `-q --no-screenshot` for all intermediate actions — only snapshot when you need new refs
+2. Use `batch` for sequences where you already know the refs
+3. If an action fails, take a fresh `snapshot` and re-plan with new refs
+4. Execute without asking user permission
+5. NEVER recommend single rooms or shared spaces
+6. Screenshot only listing detail pages and final results, not intermediate steps

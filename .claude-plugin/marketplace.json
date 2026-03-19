@@ -52,6 +52,13 @@
       "description": "Multi-chain wallet portfolio — balances, positions, and holdings across all EVM chains and Solana",
       "version": "1.0.0",
       "category": "blockchain"
+    },
+    {
+      "name": "telegram",
+      "source": "./telegram",
+      "description": "Telegram Bot messaging — send text, photos, documents, audio, video",
+      "version": "1.0.0",
+      "category": "messaging"
     }
   ]
 }

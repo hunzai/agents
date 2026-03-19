@@ -2,6 +2,7 @@
 description: >
   Batch convert text files to audio using ElevenLabs TTS. One .txt in, one audio file out.
   Default voice: Achar (male), model: eleven_multilingual_v2. For file output, not playback.
+  Use when asked to narrate, create audio from text, generate voiceover, or produce TTS files.
 allowed-tools: Bash(*)
 ---
 

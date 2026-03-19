@@ -21,8 +21,8 @@ interface FlatItem {
  * Compact snapshot — flat list of visible interactive elements.
  * ~20 lines instead of ~200. Used by most commands.
  */
-export async function takeSnapshot(page: Page): Promise<string> {
-  const data = await page.evaluate(() => {
+export async function takeSnapshot(page: Page, selector?: string | null): Promise<string> {
+  const data = await page.evaluate((sel: string | null | undefined) => {
     const INTERACTIVE_ROLES = new Set([
       "link", "button", "textbox", "checkbox", "radio",
       "combobox", "menuitem", "tab", "switch", "searchbox",
@@ -122,10 +122,11 @@ export async function takeSnapshot(page: Page): Promise<string> {
       for (const child of el.children) walkCount(child);
     }
 
-    walk(document.body);
-    walkCount(document.body);
+    const root = sel ? (document.querySelector(sel) || document.body) : document.body;
+    walk(root);
+    walkCount(root);
     return { items: result, belowViewport: belowCount };
-  });
+  }, selector);
 
   const { items, belowViewport } = data;
   if (items.length === 0) return "[empty page — no interactive elements]";

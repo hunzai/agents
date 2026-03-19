@@ -2,7 +2,8 @@
 name: travel/search-flights
 description: >
   Search Google Flights for cheap flights between cities using playwright-cli.
-  Opens browser, fills origin/destination/dates, reads results.
+  Opens browser, fills origin/destination/dates, reads results. Use when asked to
+  find flights, book travel, compare airline prices, or "how much to fly to X".
 metadata:
   tier: composite
   category: travel
@@ -16,7 +17,8 @@ metadata:
 
 # Flight Search — Google Flights
 
-Uses `playwright-cli` to automate Google Flights search.
+Uses `playwright-cli` to automate Google Flights search. Uses `-q --no-screenshot`
+for intermediate actions and `batch` for chained steps to minimize token usage.
 
 ## Step 1: Parse arguments
 
@@ -28,71 +30,83 @@ Extract: FROM, TO, DEPART, RETURN (optional), DIRECT (if "direct" or "nonstop").
 playwright-cli -s=flights open "https://www.google.com/travel/flights?hl=en" --persistent
 ```
 
-Read the snapshot file to see the page state and element refs.
+Read the snapshot to see the page state and element refs.
 
 ## Step 3: Handle cookie consent
 
 If snapshot shows a cookie consent dialog, accept it:
 
 ```bash
-playwright-cli -s=flights click <ref of "Accept all" button>
+playwright-cli -s=flights click <ref of "Accept all" button> -q --no-screenshot
+playwright-cli -s=flights snapshot
 ```
 
-## Step 4: Set origin city
+## Step 4: Fill search form (batch where possible)
 
+First, get the initial refs from the snapshot. Then use `-q --no-screenshot` for
+the form-filling sequence — only snapshot after the sequence to see the results.
+
+Set origin:
 ```bash
-playwright-cli -s=flights click <ref of "Where from?" combobox>
-playwright-cli -s=flights fill <ref of input> "$FROM"
-playwright-cli -s=flights click <ref of the city suggestion>
+playwright-cli -s=flights click <ref of "Where from?" combobox> -q --no-screenshot
+playwright-cli -s=flights fill <ref of input> "$FROM" -q --no-screenshot
+```
+Wait for suggestions, then snapshot to find the suggestion ref:
+```bash
+playwright-cli -s=flights snapshot
+playwright-cli -s=flights click <ref of city suggestion> -q --no-screenshot
 ```
 
-## Step 5: Set destination city
-
+Set destination:
 ```bash
-playwright-cli -s=flights click <ref of "Where to?" combobox>
-playwright-cli -s=flights fill <ref of input> "$TO"
-playwright-cli -s=flights click <ref of suggestion>
+playwright-cli -s=flights click <ref of "Where to?" combobox> -q --no-screenshot
+playwright-cli -s=flights fill <ref of input> "$TO" -q --no-screenshot
+playwright-cli -s=flights snapshot
+playwright-cli -s=flights click <ref of suggestion> -q --no-screenshot
 ```
 
-## Step 6: Set dates
+## Step 5: Set dates
 
 ```bash
-playwright-cli -s=flights fill <ref of Departure> "$DEPART"
-playwright-cli -s=flights press Enter
+playwright-cli -s=flights snapshot
+playwright-cli -s=flights fill <ref of Departure> "$DEPART" -q --no-screenshot
+playwright-cli -s=flights press Enter -q --no-screenshot
 ```
 
 If round trip:
 ```bash
-playwright-cli -s=flights fill <ref of Return> "$RETURN"
-playwright-cli -s=flights press Enter
+playwright-cli -s=flights fill <ref of Return> "$RETURN" -q --no-screenshot
+playwright-cli -s=flights press Enter -q --no-screenshot
 ```
 
 Date format: `Mar 28` or `Fri, Mar 28`.
 
-## Step 7: Search
-
-Find the Search button. Do NOT click "Explore destinations".
+## Step 6: Search
 
 ```bash
-playwright-cli -s=flights click <ref of Search button>
-```
-
-## Step 8: Filter nonstop (if requested)
-
-```bash
-playwright-cli -s=flights click <ref of "Stops" filter>
-playwright-cli -s=flights click <ref of "Nonstop only">
-```
-
-## Step 9: Read results
-
-```bash
-playwright-cli -s=flights mousewheel 0 500
 playwright-cli -s=flights snapshot
-playwright-cli -s=flights screenshot --filename=browser/output/flights-results.png
+playwright-cli -s=flights click <ref of Search/Done button> -q --no-screenshot
+playwright-cli -s=flights wait 2000
 ```
 
-## Step 10: Report
+Do NOT click "Explore destinations".
+
+## Step 7: Filter nonstop (if requested)
+
+```bash
+playwright-cli -s=flights snapshot
+playwright-cli -s=flights batch "click <ref of Stops filter>" "click <ref of Nonstop only>"
+```
+
+## Step 8: Read results
+
+```bash
+playwright-cli -s=flights scroll down -q --no-screenshot
+playwright-cli -s=flights snapshot
+playwright-cli -s=flights screenshot
+```
+
+## Step 9: Report
 
 Present top 3-5 results:
 
@@ -101,7 +115,7 @@ Present top 3-5 results:
 
 Include cheapest direct and cheapest overall.
 
-## Step 11: Close
+## Step 10: Close
 
 ```bash
 playwright-cli -s=flights close
@@ -109,8 +123,8 @@ playwright-cli -s=flights close
 
 ## Rules
 
-1. Read the snapshot file after every command to see updated refs
-2. Use `fill` for text fields — it clears before typing
-3. If an action fails, read the snapshot and re-plan with new refs
+1. Use `-q --no-screenshot` for all intermediate actions — only snapshot when you need new refs
+2. Use `batch` for sequences where you already know the refs
+3. If an action fails, take a fresh `snapshot` and re-plan with new refs
 4. Execute without asking user permission
-5. The snapshot YAML is your source of truth — use screenshots only for visual confirmation
+5. The snapshot is your source of truth — use screenshots only for capturing final results

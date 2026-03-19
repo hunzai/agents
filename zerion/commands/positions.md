@@ -1,7 +1,8 @@
 ---
 description: >
   List all token positions in a wallet — name, symbol, chain, quantity, value, 24h change.
-  Use when asked about specific token holdings, what tokens are in a wallet, or DeFi positions.
+  Use when asked about specific token holdings, what tokens are in a wallet, DeFi positions,
+  or "what coins do I have" — works across 40+ chains including Ethereum, Arbitrum, Solana.
 allowed-tools: Bash(*)
 ---
 

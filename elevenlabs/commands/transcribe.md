@@ -2,6 +2,7 @@
 description: >
   Transcribe audio files to text using ElevenLabs STT. Takes a directory of audio files,
   outputs per-file .txt and a combined transcript. Supports flac, wav, mp3, ogg, opus, m4a, webm.
+  Use when asked to transcribe audio, convert speech to text, or extract text from recordings.
 allowed-tools: Bash(*)
 ---
 

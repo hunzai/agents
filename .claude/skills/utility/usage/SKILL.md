@@ -2,7 +2,8 @@
 name: utility/usage
 description: >
   Show plugin and skill usage stats — total calls, tokens, and cost estimates
-  from the PostToolUse hook log. Zero overhead until invoked.
+  from the PostToolUse hook log. Zero overhead until invoked. Use when asked about
+  usage, how many times a skill was used, or "show me stats".
 metadata:
   tier: atomic
   category: utility
@@ -29,7 +30,7 @@ awk -F'|' '{plugins[$4]++} END {for (p in plugins) printf "%-15s %d calls\n", p,
 
 ## Token cost estimates
 
-Read each plugin's `tokenProfile` from its `plugin.json` to estimate total tokens:
+Estimate total tokens per plugin based on typical usage:
 
 | Plugin | Avg output tokens/call | Typical steps/skill |
 |--------|----------------------|---------------------|

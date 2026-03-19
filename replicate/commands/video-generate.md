@@ -1,7 +1,8 @@
 ---
 description: >
   Generate short videos from images using wan-video. Each image + paired .txt prompt becomes a .mp4.
-  Use when asked to create videos from images, animate images, or generate video content.
+  Use when asked to create videos from images, animate images, generate video content, or make
+  short clips — even if they just say "make this image move" or "create a video".
 allowed-tools: Bash(*)
 ---
 

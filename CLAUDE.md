@@ -13,6 +13,9 @@ Plugins are distributed via `claude plugin install <name>@hunzai-agents`. Each p
 | trader | `claude plugin install trader@hunzai-agents` | `/trade` |
 | price | `claude plugin install price@hunzai-agents` | `/fetch-price` |
 | browser | `claude plugin install browser@hunzai-agents` | `/automate` |
+| solana-cli | `claude plugin install solana-cli@hunzai-agents` | `/wallet-create` `/wallet-balance` `/transfer` `/config` |
+| zerion | `claude plugin install zerion@hunzai-agents` | `/portfolio` `/positions` |
+| telegram | `claude plugin install telegram@hunzai-agents` | `/send-text` `/send-media` `/send-results` |
 
 ### Plugin Internal Structure
 

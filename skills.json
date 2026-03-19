@@ -58,6 +58,14 @@
       "requires": ["ZERION_API_KEY"],
       "install": "claude plugin install zerion@hunzai-agents",
       "commands": ["portfolio", "positions"]
+    },
+    "telegram": {
+      "description": "Telegram Bot messaging — send text, photos, documents, audio, video",
+      "setup": "bash telegram/scripts/setup.sh",
+      "cli": "telegram/vendor/telegram/dist/cli.js",
+      "requires": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_USER_ID"],
+      "install": "claude plugin install telegram@hunzai-agents",
+      "commands": ["send-text", "send-media", "send-results"]
     }
   },
   "categories": {
@@ -261,6 +269,35 @@
         }
       ]
     },
+    "messaging": {
+      "description": "Send messages, files, and run results via Telegram",
+      "skills": [
+        {
+          "name": "messaging/send-text",
+          "description": "Send a text message via Telegram Bot.",
+          "path": "telegram/commands/send-text.md",
+          "uses": ["telegram"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        },
+        {
+          "name": "messaging/send-media",
+          "description": "Send photos, documents, audio, or video via Telegram Bot.",
+          "path": "telegram/commands/send-media.md",
+          "uses": ["telegram"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        },
+        {
+          "name": "messaging/send-results",
+          "description": "Format and send run results via Telegram — summary text + media attachments.",
+          "path": "telegram/commands/send-results.md",
+          "uses": ["telegram"],
+          "cost_estimate": "Free",
+          "source": "plugin"
+        }
+      ]
+    },
     "utility": {
       "description": "Monitoring and reporting",
       "skills": [
@@ -270,6 +307,27 @@
           "path": ".claude/skills/utility/usage/SKILL.md",
           "uses": [],
           "cost_estimate": "Free",
+          "source": "skill"
+        }
+      ]
+    },
+    "meta": {
+      "description": "Skill creation, review, and optimization tools",
+      "skills": [
+        {
+          "name": "meta/create-skill",
+          "description": "Create a new skill following agentskills.io spec with proper frontmatter, structure, and scripts.",
+          "path": ".claude/skills/meta/create-skill/SKILL.md",
+          "uses": [],
+          "cost_estimate": "~$0.01",
+          "source": "skill"
+        },
+        {
+          "name": "meta/review-skills",
+          "description": "Review, QA, and optimize existing skills against agentskills.io spec.",
+          "path": ".claude/skills/meta/review-skills/SKILL.md",
+          "uses": [],
+          "cost_estimate": "~$0.02",
           "source": "skill"
         }
       ]

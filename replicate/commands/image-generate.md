@@ -1,7 +1,8 @@
 ---
 description: >
   Generate images from text prompts. Default: seedream ($0.035/img). Also supports banana.
-  Use when asked to generate images, create illustrations, or make visuals.
+  Use when asked to generate images, create illustrations, make visuals, design graphics,
+  or produce infographics — even if they don't explicitly mention "image generation".
 allowed-tools: Bash(*)
 ---
 

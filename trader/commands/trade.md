@@ -1,7 +1,8 @@
 ---
 description: >
   Spot swap SOL/USDC and manage perpetual positions (open/close/pnl) via Jupiter.
-  Use when asked to trade SOL, check wallet balance, or manage leveraged positions.
+  Use when asked to trade SOL, swap tokens, check wallet balance, manage leveraged positions,
+  open/close perps, or check PnL — even if they just say "buy SOL" or "how's my position".
 allowed-tools: Bash(*)
 ---
 
@@ -11,7 +12,13 @@ allowed-tools: Bash(*)
 
 Build first: `bash ${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh`
 
-**Requires:** `WALLET_PATH` and `RPC_URL` env vars.
+## Environment check
+
+```bash
+echo "WALLET: ${WALLET_PATH:-NOT SET}" && echo "RPC: ${RPC_URL:-NOT SET}"
+```
+
+If either is NOT SET, stop.
 
 ## Swap Commands
 

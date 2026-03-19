@@ -1,7 +1,8 @@
 ---
 description: >
-  Check SOL balance for any Solana wallet address. Also shows token accounts.
-  Use when asked to check balance, how much SOL someone has, or wallet holdings.
+  Check SOL balance and SPL token accounts for any Solana wallet address.
+  Use when asked to check balance, how much SOL someone has, wallet holdings,
+  or "what's in this address" — for on-chain Solana data (use zerion for multi-chain).
 allowed-tools: Bash(solana:*), Bash(spl-token:*)
 ---
 
