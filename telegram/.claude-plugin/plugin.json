@@ -1,0 +1,11 @@
+{
+  "name": "telegram",
+  "description": "Telegram Bot messaging — send text, photos, documents, audio, video",
+  "version": "1.0.0",
+  "author": {
+    "name": "hunzai"
+  },
+  "repository": "https://github.com/hunzai/agents",
+  "homepage": "https://core.telegram.org/bots/api",
+  "keywords": ["telegram", "bot", "messaging", "notifications", "share", "send"]
+}
